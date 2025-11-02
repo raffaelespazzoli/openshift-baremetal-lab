@@ -41,3 +41,13 @@ kubectl port-forward -n bm-lab service/storage-ssh 10024:22 &
 ssh -p 10023 fedora@localhost
 ssh -p 10024 fedora@localhost
 ```
+
+
+## deploy dns
+
+```sh
+oc apply -f ./coredns/dns-config.yaml -n bm-lab
+helm repo add coredns https://coredns.github.io/helm
+helm --namespace=bm-lab upgrade -i coredns coredns/coredns -f ./values.yaml
+
+```
