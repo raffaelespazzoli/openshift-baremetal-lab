@@ -101,19 +101,7 @@ spec:
               user: fedora
               password: {{ .Values.storage.password }}
               chpasswd: { expire: False }
-              network:
-                version: 2
-                ethernets:
-                  match:
-                    name: enp2s0
-                    dhcp4: false
-                    dhcp6: false
-                    addresses: [ "192.168.1.2/24" ]
-                  match:
-                    name: enp3s0
-                    dhcp4: false
-                    dhcp6: false
-                    addresses: [ "192.168.2.2/24" ]
+
               # see also https://www.server-world.info/en/note?os=Fedora_40&p=iscsi&f=2                                              
               packages:
               - scsi-target-utils
@@ -144,7 +132,20 @@ spec:
               - dd if=/dev/zero of=/var/lib/iscsi_disks/disk02.img count=0 bs=1 seek=10G
               - [ systemctl, daemon-reload ]
               - [ systemctl, enable, tgtd.service ]
-              - [ systemctl, start, --no-block, tgtd.service ]                        
+              - [ systemctl, start, --no-block, tgtd.service ]
+            networkData: |-              
+              version: 2
+              ethernets:
+                st1:
+                  match
+                    name: enp2s0
+                  addresses: [ "192.168.1.2/24" ]
+                  set-name: st1
+                st2:
+                  match
+                    name: enp3s0
+                  addresses: [ "192.168.2.2/24" ]
+                  set-name: st1                                      
           name: cloudinitdisk
 ---
 apiVersion: v1
