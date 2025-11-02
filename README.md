@@ -4,6 +4,12 @@
 
 Start the `Product Enablement: OpenShift Virtualization and Migration Lab` demo lab and log in to the cluster.
 
+Make master schedulable (only needed if using the above lab which is small)
+
+```sh
+oc patch schedulers.config.openshift.io cluster --type='json' -p='[{"op": "replace", "path": "/spec/mastersSchedulable", "value":true}]'
+```
+
 
 ### deploy kyverno
 

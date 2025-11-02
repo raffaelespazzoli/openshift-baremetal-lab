@@ -32,6 +32,7 @@ spec:
         vm.redhat-cop.dns-name/nic-sapphire-roadrunner-92: fedora-vm1.lab.example.com
       creationTimestamp: null
       labels:
+        app: bastion
         kubevirt.io/domain: fedora-vm1
         kubevirt.io/size: small
         network.kubevirt.io/headlessService: headless
@@ -98,7 +99,7 @@ spec:
                 version: 2
                 ethernets:
                   match:
-                    name: nm
+                    name: enp2s0
                     dhcp4: false
                     dhcp6: false
                     addresses: [ "192.168.3.2/24" ]           
