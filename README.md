@@ -1,1 +1,43 @@
 # openshift-baremetal-lab
+
+## quick instructions
+
+Start the `Product Enablement: OpenShift Virtualization and Migration Lab` demo lab and log in to the cluster.
+
+
+### deploy kyverno
+
+```sh
+helm repo add kyverno https://kyverno.github.io/kyverno/
+helm repo update
+helm install kyverno kyverno/kyverno -n kyverno --create-namespace
+```
+
+### deploy bmc kyverno policy
+
+```sh
+oc apply -f ./kyverno/bmc-emulation-policy.yaml
+```
+
+### deploy lab helm chart
+
+create a secret with your public key to be able to access the VMs
+
+```sh
+oc new-project bm-lab
+oc create secret generic mykey --from-file=key1=${HOME}/.ssh/id_rsa.pub -n bm-lab
+```
+
+```sh
+helm upgrade -i bm-lab ./charts/bmh-vm -n bm-lab --create-namespace --set bastion.sshPublicKeySecretName=mykey --set storage.sshPublicKeySecretName=mykey --set bastion.password=mypwd --set storage.password=mypwd
+```
+
+
+connect via ssh to bastion and or storage server
+
+```sh
+kubectl port-forward -n bm-lab service/bastion-ssh 10023:22 &
+kubectl port-forward -n bm-lab service/storage-ssh 10024:22 &
+ssh -p 10023 fedora@localhost
+ssh -p 10024 fedora@localhost
+```

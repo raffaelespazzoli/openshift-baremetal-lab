@@ -1,0 +1,97 @@
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: cp1
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" . | nindent 4 }}
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: cp2
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" . | nindent 4 }}  
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: vm1
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" . | nindent 4 }}  
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled      
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: vm2
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" . | nindent 4 }}  
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled             
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: st1
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" . | nindent 4 }}  
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled 
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: st2
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" . | nindent 4 }}  
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: nm
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" . | nindent 4 }}  
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled                  

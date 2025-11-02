@@ -1,0 +1,164 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: storage
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: storage
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+spec:
+  dataVolumeTemplates:
+    - apiVersion: cdi.kubevirt.io/v1beta1
+      kind: DataVolume
+      metadata:
+        creationTimestamp: null
+        name: storage
+      spec:
+        sourceRef:
+          kind: DataSource
+          name: fedora
+          namespace: openshift-virtualization-os-images
+        storage:
+          resources:
+            requests:
+              storage: 30Gi
+  runStrategy: Always
+  template:
+    metadata:
+      annotations:
+        vm.kubevirt.io/flavor: small
+        vm.kubevirt.io/os: fedora
+        vm.kubevirt.io/workload: server
+        vm.redhat-cop.dns-name/nic-sapphire-roadrunner-92: fedora-vm1.lab.example.com
+      creationTimestamp: null
+      labels:
+        kubevirt.io/domain: fedora-vm1
+        kubevirt.io/size: small
+        network.kubevirt.io/headlessService: headless
+        vm.redhat-cop.dns-name: "true"
+    spec:
+      architecture: amd64
+      domain:
+        cpu:
+          cores: 2
+          sockets: 1
+          threads: 1
+        devices:
+          disks:
+            - disk:
+                bus: virtio
+              name: rootdisk
+            - disk:
+                bus: virtio
+              name: cloudinitdisk
+          interfaces:
+            - masquerade: {}
+              name: default
+            - name: st1
+              binding:
+                name: l2bridge
+            - name: st2
+              binding:
+                name: l2bridge                
+          rng: {}
+        features:
+          acpi: {}
+          smm:
+            enabled: true
+        firmware:
+          bootloader:
+            efi: {}
+        machine:
+          type: pc-q35-rhel9.4.0
+        memory:
+          guest: 2Gi
+        resources: {}
+      networks:
+        - name: default
+          pod: {}
+        - multus:
+            networkName: st1
+          name: st1
+        - multus:
+            networkName: st2
+          name: st2          
+      terminationGracePeriodSeconds: 180
+      accessCredentials:
+      - sshPublicKey:
+          source:
+            secret:
+              secretName: {{ .Values.storage.sshPublicKeySecretName }}
+          propagationMethod:
+            noCloud: {}      
+      volumes:
+        - dataVolume:
+            name: storage
+          name: rootdisk
+        - cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              user: fedora
+              password: {{ .Values.storage.password }}
+              chpasswd: { expire: False }
+              network:
+                version: 2
+                ethernets:
+                  match:
+                    name: st1
+                    dhcp4: false
+                    dhcp6: false
+                    addresses: [ "192.168.1.2/24" ]
+                  match:
+                    name: st2
+                    dhcp4: false
+                    dhcp6: false
+                    addresses: [ "192.168.2.2/24" ]
+              # see also https://www.server-world.info/en/note?os=Fedora_40&p=iscsi&f=2                                              
+              packages:
+              - scsi-target-utils
+              write_files:
+              - content: | 
+                  <target iqn.2024-04.world.srv:dlp.target01>
+                      # provided device as a iSCSI target
+                      backing-store /var/lib/iscsi_disks/disk01.img
+                      # iSCSI Initiator's IQN you allow to connect
+                      initiator-name iqn.2024-04.world.srv:node01.initiator
+                      # authentication info ( set anyone you like for "username", "password" )
+                      incominguser fedora {{ .Values.storage.password }}
+                  </target>
+                  <target iqn.2024-04.world.srv:dlp.target01>
+                      # provided device as a iSCSI target
+                      backing-store /var/lib/iscsi_disks/disk02.img
+                      # iSCSI Initiator's IQN you allow to connect
+                      initiator-name iqn.2024-04.world.srv:node01.initiator
+                      # authentication info ( set anyone you like for "username", "password" )
+                      incominguser fedora {{ .Values.storage.password }}
+                  </target>                                 
+                owner: root:root
+                path: /etc/sysconfig/selinux
+                permissions: '0644'              
+              runcmd:
+              - mkdir /var/lib/iscsi_disks
+              - dd if=/dev/zero of=/var/lib/iscsi_disks/disk01.img count=0 bs=1 seek=10G
+              - dd if=/dev/zero of=/var/lib/iscsi_disks/disk02.img count=0 bs=1 seek=10G
+              - [ systemctl, daemon-reload ]
+              - [ systemctl, enable, tgtd.service ]
+              - [ systemctl, start, --no-block, tgtd.service ]                        
+          name: cloudinitdisk
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storage-ssh
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: storage
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app: storage
+  ports:
+    - protocol: TCP
+      port: 22
+      targetPort: 22          
