@@ -1,5 +1,9 @@
 # openshift-baremetal-lab
 
+these insructions will setup a lab with the following architecture:
+
+![OpenShift baremetal lab architecture](./media/bm-build.drawio.png)
+
 ## quick instructions
 
 Start the `Product Enablement: OpenShift Virtualization and Migration Lab` demo lab and log in to the cluster.
