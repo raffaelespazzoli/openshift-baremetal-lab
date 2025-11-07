@@ -1,10 +1,10 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: bastion
+  name: router
   namespace: {{ .Release.Namespace }}
   labels:
-    app: bastion
+    app: router
     {{- include "bmh-vm.labels" . | nindent 4 }}
 spec:
   dataVolumeTemplates:
@@ -12,16 +12,16 @@ spec:
       kind: DataVolume
       metadata:
         creationTimestamp: null
-        name: bastion
+        name: router
       spec:
         sourceRef:
           kind: DataSource
-          name: fedora
+          name: vjunos
           namespace: openshift-virtualization-os-images
         storage:
           resources:
             requests:
-              storage: 30Gi
+              storage: 50Gi
   runStrategy: Always
   template:
     metadata:
@@ -32,7 +32,7 @@ spec:
         vm.redhat-cop.dns-name/nic-sapphire-roadrunner-92: fedora-vm1.lab.example.com
       creationTimestamp: null
       labels:
-        app: bastion
+        app: router
         kubevirt.io/domain: fedora-vm1
         kubevirt.io/size: small
         network.kubevirt.io/headlessService: headless
@@ -58,6 +58,15 @@ spec:
             - name: nm
               binding:
                 name: l2bridge
+            - name: m1
+              binding:
+                name: l2bridge
+            - name: vm1
+              binding:
+                name: l2bridge
+            - name: vm2
+              binding:
+                name: l2bridge                                                
           rng: {}
         features:
           acpi: {}
@@ -77,6 +86,18 @@ spec:
         - multus:
             networkName: nm
           name: nm
+        - multus:
+            networkName: m1
+          name: m1
+        - multus:
+            networkName: m2
+          name: m2
+        - multus:
+            networkName: vm1
+          name: vm1
+        - multus:
+            networkName: vm2
+          name: vm2                                        
       terminationGracePeriodSeconds: 180
       accessCredentials:
       - sshPublicKey:
@@ -87,7 +108,7 @@ spec:
             noCloud: {}      
       volumes:
         - dataVolume:
-            name: bastion
+            name: router
           name: rootdisk
         - cloudInitNoCloud:
             userData: |-
@@ -101,22 +122,22 @@ spec:
                 nm:
                   match:
                     name: enp2s0
-                  addresses: [ "192.168.3.2/24" ] 
+                  addresses: [ "192.168.3.1/24" ] 
                   set-name: nm                              
           name: cloudinitdisk
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: bastion-ssh
+  name: router-ssh
   namespace: {{ .Release.Namespace }}
   labels:
-    app: bastion
+    app: router
     {{- include "bmh-vm.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   selector:
-    app: bastion
+    app: router
   ports:
     - protocol: TCP
       port: 22

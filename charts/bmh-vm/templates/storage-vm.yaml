@@ -88,7 +88,7 @@ spec:
       - sshPublicKey:
           source:
             secret:
-              secretName: {{ .Values.storage.sshPublicKeySecretName }}
+              secretName: {{ .Values.sshPublicKeySecretName }}
           propagationMethod:
             noCloud: {}      
       volumes:
@@ -99,7 +99,7 @@ spec:
             userData: |-
               #cloud-config
               user: fedora
-              password: {{ .Values.storage.password }}
+              password: {{ .Values.password }}
               chpasswd: { expire: False }
 
               # see also https://www.server-world.info/en/note?os=Fedora_40&p=iscsi&f=2                                              
@@ -113,7 +113,7 @@ spec:
                       # iSCSI Initiator's IQN you allow to connect
                       initiator-name iqn.2024-04.world.srv:node01.initiator
                       # authentication info ( set anyone you like for "username", "password" )
-                      incominguser fedora {{ .Values.storage.password }}
+                      incominguser fedora {{ .Values.password }}
                   </target>
                   <target iqn.2024-04.world.srv:dlp.target01>
                       # provided device as a iSCSI target
@@ -121,7 +121,7 @@ spec:
                       # iSCSI Initiator's IQN you allow to connect
                       initiator-name iqn.2024-04.world.srv:node01.initiator
                       # authentication info ( set anyone you like for "username", "password" )
-                      incominguser fedora {{ .Values.storage.password }}
+                      incominguser fedora {{ .Values.password }}
                   </target>                                 
                 owner: root:root
                 path: /etc/sysconfig/selinux

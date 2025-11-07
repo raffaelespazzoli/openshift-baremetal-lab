@@ -6,10 +6,61 @@ nodes:
   - name: worker2
   - name: worker3
 
-bastion:
-  sshPublicKeySecretName: ciao
-  password: j7q5-vkj6-5pcr
 
-storage:
-  sshPublicKeySecretName: ciao
-  password: j7q5-vkj6-5pcr     
+sshPublicKeySecretName: ciao
+password: j7q5-vkj6-5pcr
+
+coredns:
+  podAnnotations:
+    k8s.v1.cni.cncf.io/networks: |
+      [
+        {
+          "name": "nm",
+          "interface": "nm",
+          "ips": ["192.168.3.3/24"]
+        }
+      ]
+
+  extraVolumes:
+    - name: dns-config
+      configMap: 
+        name: dns-config
+
+  extraVolumeMounts:
+    - name: dns-config
+      mountPath: /config-file  
+
+
+  # https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/#coredns-configmap-options
+  servers:
+  - zones:
+    - name: "bm-lab.local."
+    port: 53
+    # -- expose the service on a different port
+    # servicePort: 5353
+    # If serviceType is nodePort you can specify nodePort here
+    # nodePort: 30053
+    # hostPort: 53
+    plugins:
+    - name: errors
+    # Serves a /health endpoint on :8080, required for livenessProbe
+    - name: health
+      configBlock: |-
+        lameduck 10s
+    # Serves a /ready endpoint on :8181, required for readinessProbe
+    - name: ready
+    # Required to query kubernetes API for data
+    # Serves a /metrics endpoint on :9153, required for serviceMonitor
+    - name: prometheus
+      parameters: 0.0.0.0:9153
+    - name: file
+      parameters: /config-file/dns-config.txt "bm-lab.local."
+      configBlock: |-
+        reload 30s
+    - name: forward
+      parameters: . /etc/resolv.conf
+    - name: cache
+      parameters: 30
+    - name: loop
+    - name: reload
+    - name: loadbalance       
