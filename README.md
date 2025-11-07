@@ -39,7 +39,7 @@ oc create secret generic mykey --from-file=key1=${HOME}/.ssh/id_rsa.pub -n bm-la
 ```
 
 ```sh
-helm upgrade -i bm-lab ./charts/bmh-vm -n bm-lab --create-namespace --set bastion.sshPublicKeySecretName=mykey --set storage.sshPublicKeySecretName=mykey --set bastion.password=mypwd --set storage.password=mypwd
+helm upgrade -i bm-lab ./charts/bmh-vm -n bm-lab --create-namespace --set sshPublicKeySecretName=mykey --set password=mypwd
 ```
 
 

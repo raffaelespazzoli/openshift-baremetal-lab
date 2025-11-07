@@ -14,10 +14,14 @@ spec:
         creationTimestamp: null
         name: router
       spec:
-        sourceRef:
-          kind: DataSource
-          name: vjunos
-          namespace: openshift-virtualization-os-images
+        source:
+          pvc:
+            name: vjunos
+            namespace: openshift-virtualization-os-images
+        # sourceRef:
+        #   kind: PersistentVolumeClaim
+        #   name: vjunos
+        #   namespace: openshift-virtualization-os-images
         storage:
           resources:
             requests:
@@ -41,9 +45,12 @@ spec:
       architecture: amd64
       domain:
         cpu:
-          cores: 2
+          cores: 4
           sockets: 1
           threads: 1
+          features:
+          - name: svm
+            policy: require             
         devices:
           disks:
             - disk:
@@ -58,9 +65,12 @@ spec:
             - name: nm
               binding:
                 name: l2bridge
-            - name: m1
+            - name: cp1
               binding:
                 name: l2bridge
+            - name: cp2
+              binding:
+                name: l2bridge                
             - name: vm1
               binding:
                 name: l2bridge
@@ -71,14 +81,14 @@ spec:
         features:
           acpi: {}
           smm:
-            enabled: true
+            enabled: true         
         firmware:
           bootloader:
-            efi: {}
+            bios: {}
         machine:
           type: pc-q35-rhel9.4.0
         memory:
-          guest: 2Gi
+          guest: 6Gi
         resources: {}
       networks:
         - name: default
@@ -87,11 +97,11 @@ spec:
             networkName: nm
           name: nm
         - multus:
-            networkName: m1
-          name: m1
+            networkName: cp1
+          name: cp1
         - multus:
-            networkName: m2
-          name: m2
+            networkName: cp2
+          name: cp2
         - multus:
             networkName: vm1
           name: vm1
