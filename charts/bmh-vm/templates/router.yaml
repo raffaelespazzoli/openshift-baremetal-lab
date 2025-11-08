@@ -1,140 +1,139 @@
-apiVersion: kubevirt.io/v1
-kind: VirtualMachine
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: router
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: router
+    {{- include "bmh-vm.labels" . | nindent 4 }}  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: router
+  template:
+    metadata:
+      labels:
+        app: router
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |
+          [
+            {
+              "name": "nm",
+              "interface": "nm",
+              "ips": ["192.168.3.1/24"]
+            },
+            {
+              "name": "cp1",
+              "interface": "cp1"
+            },
+            {
+              "name": "cp2",
+              "interface": "cp2"
+            },
+            {
+              "name": "vm1",
+              "interface": "vm1"
+            },
+            {
+              "name": "vm2",
+              "interface": "vm2"
+            }            
+          ]
+    spec:
+      serviceAccountName: router
+      imagePullSecrets:
+      - name: quay     
+      containers:
+      - name: router
+        image: quay.io/raffaelespazzoli/juniper_vjunos-router:25.2R1.9
+        volumeMounts:
+        - name: router-config
+          mountPath: /config
+        securityContext:
+          privileged: true          
+      volumes:
+      - name: router-config
+        configMap:
+          name: router-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: router-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: router
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+data:
+  startup-config.cfg: |
+    interfaces {
+      ae0 {
+        aggregated-ether-options {
+          lacp {
+            active;
+          }
+        }
+        unit 0 {
+          family inet {
+            address 192.168.0.1/24;
+          }
+        }
+      }
+      ae1 {
+        aggregated-ether-options {
+          lacp {
+            active;
+          }
+        }
+      }
+      ge-0/0/2 {
+        ether-options {
+          802.3ad ae0;
+        }
+      }
+      ge-0/0/3 {
+        ether-options {
+          802.3ad ae0;
+        }
+      }
+      ge-0/0/4 {
+        ether-options {
+          802.3ad ae1;
+        }
+      }
+      ge-0/0/5 {
+        ether-options {
+          802.3ad ae1;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: ServiceAccount
 metadata:
   name: router
   namespace: {{ .Release.Namespace }}
   labels:
     app: router
     {{- include "bmh-vm.labels" . | nindent 4 }}
-spec:
-  dataVolumeTemplates:
-    - apiVersion: cdi.kubevirt.io/v1beta1
-      kind: DataVolume
-      metadata:
-        creationTimestamp: null
-        name: router
-      spec:
-        source:
-          pvc:
-            name: vjunos
-            namespace: openshift-virtualization-os-images
-        # sourceRef:
-        #   kind: PersistentVolumeClaim
-        #   name: vjunos
-        #   namespace: openshift-virtualization-os-images
-        storage:
-          resources:
-            requests:
-              storage: 50Gi
-  runStrategy: Always
-  template:
-    metadata:
-      annotations:
-        vm.kubevirt.io/flavor: small
-        vm.kubevirt.io/os: fedora
-        vm.kubevirt.io/workload: server
-        vm.redhat-cop.dns-name/nic-sapphire-roadrunner-92: fedora-vm1.lab.example.com
-      creationTimestamp: null
-      labels:
-        app: router
-        kubevirt.io/domain: fedora-vm1
-        kubevirt.io/size: small
-        network.kubevirt.io/headlessService: headless
-        vm.redhat-cop.dns-name: "true"
-    spec:
-      architecture: amd64
-      domain:
-        cpu:
-          cores: 4
-          sockets: 1
-          threads: 1
-          features:
-          - name: svm
-            policy: require             
-        devices:
-          disks:
-            - disk:
-                bus: virtio
-              name: rootdisk
-            - disk:
-                bus: virtio
-              name: cloudinitdisk
-          interfaces:
-            - masquerade: {}
-              name: default
-            - name: nm
-              binding:
-                name: l2bridge
-            - name: cp1
-              binding:
-                name: l2bridge
-            - name: cp2
-              binding:
-                name: l2bridge                
-            - name: vm1
-              binding:
-                name: l2bridge
-            - name: vm2
-              binding:
-                name: l2bridge                                                
-          rng: {}
-        features:
-          acpi: {}
-          smm:
-            enabled: true         
-        firmware:
-          bootloader:
-            bios: {}
-        machine:
-          type: pc-q35-rhel9.4.0
-        memory:
-          guest: 6Gi
-        resources: {}
-      networks:
-        - name: default
-          pod: {}
-        - multus:
-            networkName: nm
-          name: nm
-        - multus:
-            networkName: cp1
-          name: cp1
-        - multus:
-            networkName: cp2
-          name: cp2
-        - multus:
-            networkName: vm1
-          name: vm1
-        - multus:
-            networkName: vm2
-          name: vm2                                        
-      terminationGracePeriodSeconds: 180
-      accessCredentials:
-      - sshPublicKey:
-          source:
-            secret:
-              secretName: {{ .Values.sshPublicKeySecretName }}
-          propagationMethod:
-            noCloud: {}      
-      volumes:
-        - dataVolume:
-            name: router
-          name: rootdisk
-        - cloudInitNoCloud:
-            userData: |-
-              #cloud-config
-              user: fedora
-              password: {{ .Values.password }}
-              chpasswd: { expire: False }
-            networkData: |-
-              version: 2   
-              ethernets:
-                nm:
-                  match:
-                    name: enp2s0
-                  addresses: [ "192.168.3.1/24" ] 
-                  set-name: nm                              
-          name: cloudinitdisk
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: router-privileged
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: router
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: router
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: system:openshift:scc:privileged
+  apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: v1
 kind: Service
@@ -152,3 +151,39 @@ spec:
     - protocol: TCP
       port: 22
       targetPort: 22
+      name: ssh
+    - protocol: TCP
+      port: 830
+      targetPort: 830
+      name: netconf
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      name: telnet-serial
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      name: http
+    - protocol: TCP
+      port: 443
+      targetPort: 443
+      name: https      
+    - protocol: TCP
+      port: 161
+      targetPort: 161
+      name: snmp      
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: router
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: router
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+spec:
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: router-ssh

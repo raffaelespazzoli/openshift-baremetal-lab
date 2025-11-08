@@ -36,6 +36,7 @@ create a secret with your public key to be able to access the VMs
 ```sh
 oc new-project bm-lab
 oc create secret generic mykey --from-file=key1=${HOME}/.ssh/id_rsa.pub -n bm-lab
+oc create secret docker-registry quay --docker-username=xxx --docker-password=xxx --docker-email=xxx --docker-server=quay.io -n bm-lab
 ```
 
 ```sh
@@ -48,8 +49,10 @@ connect via ssh to bastion and or storage server
 ```sh
 kubectl port-forward -n bm-lab service/bastion-ssh 10023:22 &
 kubectl port-forward -n bm-lab service/storage-ssh 10024:22 &
+kubectl port-forward -n bm-lab service/router-ssh 10025:22 &
 ssh -p 10023 fedora@localhost
 ssh -p 10024 fedora@localhost
+ssh -p 10025 admin@localhost
 ```
 
 
