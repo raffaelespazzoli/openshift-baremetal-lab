@@ -20,26 +20,27 @@ spec:
           [
             {
               "name": "nm",
-              "interface": "nm"
+              "interface": "eth1"
             },
             {
               "name": "cp1",
-              "interface": "cp1"
+              "interface": "eth2"
             },
             {
               "name": "cp2",
-              "interface": "cp2"
+              "interface": "eth3"
             },
             {
               "name": "vm1",
-              "interface": "vm1"
+              "interface": "eth4"
             },
             {
               "name": "vm2",
-              "interface": "vm2"
+              "interface": "eth5"
             }            
           ]
     spec:
+      enableServiceLinks: false
       serviceAccountName: switch
       imagePullSecrets:
       - name: quay     
@@ -66,6 +67,11 @@ metadata:
     {{- include "bmh-vm.labels" . | nindent 4 }}
 data:
   startup-config.cfg: |
+    aggregated-devices {
+        ethernet {
+            device-count 2;
+        }
+    }    
     interfaces {
       ae0 {
         aggregated-ether-options {
@@ -86,6 +92,18 @@ data:
           }
         }
       }
+      ge-0/0/0 {
+        unit 0 {
+          family inet {
+            address 192.168.3.1/24;
+          }
+        }
+      }      
+      ge-0/0/1 {
+        ether-options {
+          802.3ad ae0;
+        }
+      }
       ge-0/0/2 {
         ether-options {
           802.3ad ae0;
@@ -93,15 +111,10 @@ data:
       }
       ge-0/0/3 {
         ether-options {
-          802.3ad ae0;
-        }
-      }
-      ge-0/0/4 {
-        ether-options {
           802.3ad ae1;
         }
       }
-      ge-0/0/5 {
+      ge-0/0/4 {
         ether-options {
           802.3ad ae1;
         }

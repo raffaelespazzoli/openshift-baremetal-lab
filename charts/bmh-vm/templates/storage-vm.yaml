@@ -137,15 +137,13 @@ spec:
               version: 2
               ethernets:
                 st1:
-                  match
+                  match:
                     name: enp2s0
                   addresses: [ "192.168.1.2/24" ]
-                  set-name: st1
                 st2:
-                  match
+                  match:
                     name: enp3s0
-                  addresses: [ "192.168.2.2/24" ]
-                  set-name: st1                                      
+                  addresses: [ "192.168.2.2/24" ]                                      
           name: cloudinitdisk
 ---
 apiVersion: v1

@@ -53,6 +53,9 @@ kubectl port-forward -n bm-lab service/router-ssh 10025:22 &
 ssh -p 10023 fedora@localhost
 ssh -p 10024 fedora@localhost
 ssh -p 10025 admin@localhost
+
+kubectl port-forward -n bm-lab service/switch-ssh 10026:22 &
+ssh -p 10026 admin@localhost
 ```
 
 

@@ -101,8 +101,7 @@ spec:
                 nm:
                   match:
                     name: enp2s0
-                  addresses: [ "192.168.3.2/24" ] 
-                  set-name: nm                              
+                  addresses: [ "192.168.3.2/24" ]                              
           name: cloudinitdisk
 ---
 apiVersion: v1
