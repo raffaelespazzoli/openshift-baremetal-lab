@@ -55,12 +55,18 @@ spec:
           interfaces:
             - masquerade: {}
               name: default
+            {{- if eq .Values.networkConfiguration "simple" }}
+            - name: st
+              binding:
+                name: l2bridge
+            {{- else if eq .Values.networkConfiguration "bonds" }}                  
             - name: st1
               binding:
                 name: l2bridge
             - name: st2
               binding:
-                name: l2bridge                
+                name: l2bridge
+            {{- end }}                
           rng: {}
         features:
           acpi: {}
@@ -77,12 +83,18 @@ spec:
       networks:
         - name: default
           pod: {}
+        {{- if eq .Values.networkConfiguration "simple" }}
+        - multus:
+            networkName: st
+          name: st
+        {{- else if eq .Values.networkConfiguration "bonds" }}           
         - multus:
             networkName: st1
           name: st1
         - multus:
             networkName: st2
-          name: st2          
+          name: st2
+        {{- end }}           
       terminationGracePeriodSeconds: 180
       accessCredentials:
       - sshPublicKey:
@@ -136,14 +148,15 @@ spec:
             networkData: |-              
               version: 2
               ethernets:
-                st1:
-                  match:
-                    name: enp2s0
+              {{- if eq .Values.networkConfiguration "simple" }}
+                enp2s0:
                   addresses: [ "192.168.1.2/24" ]
-                st2:
-                  match:
-                    name: enp3s0
-                  addresses: [ "192.168.2.2/24" ]                                      
+              {{- else if eq .Values.networkConfiguration "bonds" }}                  
+                enp2s0:
+                  addresses: [ "192.168.1.2/24" ]
+                enp3s0:
+                  addresses: [ "192.168.2.2/24" ]
+              {{- end }}                                      
           name: cloudinitdisk
 ---
 apiVersion: v1
@@ -161,4 +174,5 @@ spec:
   ports:
     - protocol: TCP
       port: 22
-      targetPort: 22          
+      targetPort: 22    
+

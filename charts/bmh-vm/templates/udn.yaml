@@ -1,7 +1,8 @@
+{{ if eq .Values.networkConfiguration "simple" }}
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
-  name: cp1
+  name: m
   namespace: {{ .Release.Namespace }}
   labels:
   {{- include "bmh-vm.labels" . | nindent 4 }}
@@ -11,14 +12,16 @@ spec:
     role: Secondary
     ipam:
       mode: Disabled
----
+{{ else if eq .Values.networkConfiguration "bonds" }}
+{{ $dot := . }}
+{{ range .Values.nodes }}
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
-  name: cp2
-  namespace: {{ .Release.Namespace }}
+  name: cp-{{ .name }}-1
+  namespace: {{ $dot.Release.Namespace }}
   labels:
-  {{- include "bmh-vm.labels" . | nindent 4 }}  
+  {{- include "bmh-vm.labels" $dot | nindent 4 }}
 spec:
   topology: Layer2 
   layer2: 
@@ -29,10 +32,24 @@ spec:
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
-  name: vm1
-  namespace: {{ .Release.Namespace }}
+  name: cp-{{ .name }}-2
+  namespace: {{ $dot.Release.Namespace }}
   labels:
-  {{- include "bmh-vm.labels" . | nindent 4 }}  
+  {{- include "bmh-vm.labels" $dot | nindent 4 }}  
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: vm-{{ .name }}-1
+  namespace: {{ $dot.Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" $dot | nindent 4 }}  
 spec:
   topology: Layer2 
   layer2: 
@@ -43,10 +60,10 @@ spec:
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
-  name: vm2
-  namespace: {{ .Release.Namespace }}
+  name: vm-{{ .name }}-2
+  namespace: {{ $dot.Release.Namespace }}
   labels:
-  {{- include "bmh-vm.labels" . | nindent 4 }}  
+  {{- include "bmh-vm.labels" $dot | nindent 4 }}  
 spec:
   topology: Layer2 
   layer2: 
@@ -57,10 +74,10 @@ spec:
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
-  name: st1
-  namespace: {{ .Release.Namespace }}
+  name: st-{{ .name }}-1
+  namespace: {{ $dot.Release.Namespace }}
   labels:
-  {{- include "bmh-vm.labels" . | nindent 4 }}  
+  {{- include "bmh-vm.labels" $dot | nindent 4 }}  
 spec:
   topology: Layer2 
   layer2: 
@@ -71,16 +88,18 @@ spec:
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
-  name: st2
-  namespace: {{ .Release.Namespace }}
+  name: st-{{ .name }}-2
+  namespace: {{ $dot.Release.Namespace }}
   labels:
-  {{- include "bmh-vm.labels" . | nindent 4 }}  
+  {{- include "bmh-vm.labels" $dot | nindent 4 }} 
 spec:
   topology: Layer2 
   layer2: 
     role: Secondary
     ipam:
       mode: Disabled
+{{ end }}
+{{ end }}
 ---
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork

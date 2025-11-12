@@ -1,3 +1,4 @@
+# nodes that will become part of the cluster
 nodes:
   - name: master1
   - name: master2
@@ -6,10 +7,17 @@ nodes:
   - name: worker2
   - name: worker3
 
+# network configuration for the lab. Valid values are simple, bonds
+networkConfiguration: simple
+# whether the environment is disconnected or not 
+disconnectedEnvironment: false
 
+#public key for accessing VMS (not the node), must be in the for that OCV expects
 sshPublicKeySecretName: ciao
+# password for sshing into VMS
 password: j7q5-vkj6-5pcr
 
+# coddns additional configuration
 coredns:
   podAnnotations:
     k8s.v1.cni.cncf.io/networks: |

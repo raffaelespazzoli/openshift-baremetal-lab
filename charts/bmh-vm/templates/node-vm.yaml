@@ -34,9 +34,20 @@ spec:
                 bus: virtio
               name: rootdisk
           interfaces:
-            - name: cp1
+          {{ if eq $dot.Values.networkConfiguration "simple" }}
+            - name: m
               binding:
                 name: l2bridge
+            - name: vm
+              binding:
+                name: l2bridge
+            - name: st
+              binding:
+                name: l2bridge                                           
+          {{ else if eq $dot.Values.networkConfiguration "bonds" }}
+            - name: cp1
+              binding:
+                name: l2bridge 
             - name: cp2
               binding:
                 name: l2bridge
@@ -51,7 +62,8 @@ spec:
                 name: l2bridge
             - name: st2
               binding:
-                name: l2bridge                                                                                
+                name: l2bridge
+          {{ end }}                                                                                    
           rng: {}
         features:
           acpi: {}
@@ -64,24 +76,36 @@ spec:
           guest: 16Gi
         resources: {}
       networks:
+        {{ if eq $dot.Values.networkConfiguration "simple" }}
+        - name: m
+          multus: 
+            networkName: m
+        - name: vm
+          multus: 
+            networkName: vm
+        - name: st
+          multus: 
+            networkName: st
+        {{ else if eq $dot.Values.networkConfiguration "bonds" }}                
         - name: cp1
           multus: 
-            networkName: cp1
+            networkName: cp-{{ .name }}-1
         - name: cp2
           multus: 
-            networkName: cp2
+            networkName: cp-{{ .name }}-2
         - name: vm1
           multus: 
-            networkName: vm1
+            networkName: vm-{{ .name }}-1
         - name: vm2
           multus: 
-            networkName: vm2  
+            networkName: vm2-{{ .name }}-2
         - name: st1
           multus: 
             networkName: st1
         - name: st2
           multus: 
-            networkName: st2                               
+            networkName: st-{{ .name }}-2
+        {{ end }}                               
       terminationGracePeriodSeconds: 180     
       volumes:
         - persistentVolumeClaim:

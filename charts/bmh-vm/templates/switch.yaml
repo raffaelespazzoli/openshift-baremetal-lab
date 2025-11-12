@@ -17,28 +17,51 @@ spec:
         app: switch
       annotations:
         k8s.v1.cni.cncf.io/networks: |
+        {{ if eq .Values.networkConfiguration "simple" }}
           [
             {
-              "name": "nm",
-              "interface": "eth1"
-            },
-            {
-              "name": "cp1",
+              "name": "m",
               "interface": "eth2"
             },
             {
-              "name": "cp2",
+              "name": "vm",
               "interface": "eth3"
             },
             {
-              "name": "vm1",
+              "name": "st",
               "interface": "eth4"
             },
             {
-              "name": "vm2",
-              "interface": "eth5"
-            }            
+              "name": "nm",
+              "interface": "eth1"
+            }                      
           ]
+        {{ else if eq .Values.networkConfiguration "bonds" }}
+          [
+          {{- range $index, $element := .Values.nodes }}
+            {
+              "name": "cp-{{ $element.name }}-1",
+              "interface": "eth{{ add (mul $index 2) 2 }}"
+            },
+            {
+              "name": "cp-{{ $element.name }}-2",
+              "interface": "eth{{ add (mul $index 2) 3 }}"
+            },
+            {
+              "name": "vm-{{ $element.name }}-1",
+              "interface": "eth{{ add (mul $index 2) 5 }}"
+            },
+            {
+              "name": "vm-{{ $element.name }}-2",
+              "interface": "eth{{ add (mul $index 2) 5 }}"
+            },
+          {{- end }}
+            {
+              "name": "nm",
+              "interface": "eth1"
+            }                      
+          ]
+        {{ end }}
     spec:
       enableServiceLinks: false
       serviceAccountName: switch
@@ -71,55 +94,42 @@ data:
         ethernet {
             device-count 2;
         }
-    }    
+    }
+    {{- if eq .Values.networkConfiguration "simple" }}    
     interfaces {
-      ae0 {
-        aggregated-ether-options {
-          lacp {
-            active;
-          }
-        }
-        unit 0 {
-          family inet {
-            address 192.168.0.1/24;
-          }
-        }
-      }
-      ae1 {
-        aggregated-ether-options {
-          lacp {
-            active;
-          }
-        }
-      }
       ge-0/0/0 {
         unit 0 {
           family inet {
             address 192.168.3.1/24;
           }
         }
-      }      
+      }
       ge-0/0/1 {
-        ether-options {
-          802.3ad ae0;
+        unit 0 {
+          family inet {
+            address 192.168.0.1/24;
+          }
         }
       }
       ge-0/0/2 {
-        ether-options {
-          802.3ad ae0;
+        unit 0 {
+          family inet {
+            address 192.168.1.1/24;
+          }
         }
       }
       ge-0/0/3 {
-        ether-options {
-          802.3ad ae1;
-        }
-      }
-      ge-0/0/4 {
-        ether-options {
-          802.3ad ae1;
+        unit 0 {
+          family inet {
+            address 192.168.2.1/24;
+          }
         }
       }
     }
+    {{- else if eq .Values.networkConfiguration "bonds" }}    
+    interfaces {}
+    {{- end }}                    
+
 ---
 apiVersion: v1
 kind: ServiceAccount

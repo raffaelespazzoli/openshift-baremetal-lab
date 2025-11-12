@@ -44,26 +44,23 @@ helm upgrade -i bm-lab ./charts/bmh-vm -n bm-lab --create-namespace --set sshPub
 ```
 
 
-connect via ssh to bastion and or storage server
+connect via ssh to bastion, storage, switch
 
 ```sh
 kubectl port-forward -n bm-lab service/bastion-ssh 10023:22 &
-kubectl port-forward -n bm-lab service/storage-ssh 10024:22 &
-kubectl port-forward -n bm-lab service/router-ssh 10025:22 &
 ssh -p 10023 fedora@localhost
-ssh -p 10024 fedora@localhost
-ssh -p 10025 admin@localhost
 
-kubectl port-forward -n bm-lab service/switch-ssh 10026:22 &
-ssh -p 10026 admin@localhost
+kubectl port-forward -n bm-lab service/storage-ssh 10024:22 &
+ssh -p 10024 fedora@localhost
+
+kubectl port-forward -n bm-lab service/switch-ssh 10025:22 &
+ssh -p 10025 admin@localhost
 ```
 
 
-## deploy dns
+## uninstallation
 
 ```sh
-oc apply -f ./coredns/dns-config.yaml -n bm-lab
-helm repo add coredns https://coredns.github.io/helm
-helm --namespace=bm-lab upgrade -i coredns coredns/coredns -f ./values.yaml
-
+helm uninstall bm-lab -n bm-lab
+oc delete namespace bm-lab
 ```

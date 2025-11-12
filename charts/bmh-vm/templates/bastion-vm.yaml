@@ -95,12 +95,14 @@ spec:
               user: fedora
               password: {{ .Values.password }}
               chpasswd: { expire: False }
+              runcm:
+              - mkdir -p /root/oc
+              - curl https://downloads-openshift-console.apps.etl6.ocp.rht-labs.com/amd64/linux/oc.tar | tar -xvf file.tar.gz -C /root/oc
+              - mv /root/oc/oc /usr/local/bin/oc
             networkData: |-
               version: 2   
               ethernets:
-                nm:
-                  match:
-                    name: enp2s0
+                enp2s0:
                   addresses: [ "192.168.3.2/24" ]                              
           name: cloudinitdisk
 ---
@@ -120,3 +122,8 @@ spec:
     - protocol: TCP
       port: 22
       targetPort: 22
+
+
+
+https://downloads-openshift-console.apps.etl6.ocp.rht-labs.com/amd64/linux/oc.tar       
+oc adm release extract --registry-config "${pullsecret_file}" --command=openshift-install-fips --to "${extract_dir}" ${RELEASE_IMAGE}           
