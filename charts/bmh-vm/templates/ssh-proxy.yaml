@@ -22,7 +22,7 @@ data:
 
 
     frontend fe_ssh
-      bind *:2222 ssl crt /etc/haproxy/certs/ssl.pem
+      bind *:2222 ssl crt /etc/haproxy/certs/tls.key
       mode tcp
       log-format "%ci:%cp [%t] %ft %b/%s %Tw/%Tc/%Tt %B %ts %ac/%fc/%bc/%sc/%rc %sq/%bq dst:%[var(sess.dst)] "
       tcp-request content set-var(sess.dst) ssl_fc_sni
@@ -31,8 +31,9 @@ data:
 
     backend ssh-all
       mode tcp
-      tcp-request content do-resolve(sess.dstIP,default,ipv4) str(sess.dst) ".{{ .Release.Namespace }}.svc"
-      tcp-request content set-dst sess.dstIP
+      tcp-request content set-var(sess.full_host) var(sess.dst_name),concat(".{{ .Release.Namespace }}.svc")
+      tcp-request content do-resolve(sess.dst_ip,default,ipv4) var(sess.full_host)
+      tcp-request content set-dst sess.dst_ip
       server ssh 0.0.0.0:22
 
 ---
@@ -55,18 +56,22 @@ spec:
     spec:
       containers:
       - name: haproxy
-        image: registry.connect.redhat.com/haproxytech/haproxy:latest
+        image: quay.io/haproxy:lts
         ports:
         - containerPort: 2222
           name: ssh-proxy
         volumeMounts:
         - name: config
           mountPath: /etc/haproxy
+        - name: ssh-proxy-tls
+          mountPath: /etc/haproxy/certs
       volumes:
       - name: config
         configMap:
           name: ssh-proxy
-
+      - name: ssh-proxy-tls
+        configMap:
+          name: ssh-proxy-tls
 ---
 apiVersion: v1
 kind: Service
@@ -74,7 +79,9 @@ metadata:
   name: ssh-proxy
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "bmh-vm.labels" . | nindent 4 }}  
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+  annotations :
+    service.beta.openshift.io/serving-cert-secret-name: ssh-proxy-tls
 spec:
   selector:
     app: ssh-proxy
