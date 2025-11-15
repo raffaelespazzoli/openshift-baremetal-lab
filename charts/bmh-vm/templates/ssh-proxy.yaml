@@ -22,7 +22,7 @@ data:
 
 
     frontend fe_ssh
-      bind *:2222 ssl crt /etc/haproxy/certs/tls.key
+      bind *:2222 ssl crt /etc/haproxy/certs
       mode tcp
       log-format "%ci:%cp [%t] %ft %b/%s %Tw/%Tc/%Tt %B %ts %ac/%fc/%bc/%sc/%rc %sq/%bq dst:%[var(sess.dst)] "
       tcp-request content set-var(sess.dst) ssl_fc_sni
@@ -33,7 +33,7 @@ data:
       mode tcp
       tcp-request content set-var(sess.full_host) var(sess.dst_name),concat(".{{ .Release.Namespace }}.svc")
       tcp-request content do-resolve(sess.dst_ip,default,ipv4) var(sess.full_host)
-      tcp-request content set-dst sess.dst_ip
+      tcp-request content set-dst var(sess.dst_ip)
       server ssh 0.0.0.0:22
 
 ---
@@ -54,15 +54,16 @@ spec:
       labels:
         app: ssh-proxy
     spec:
+      serviceAccountName: ssh-proxy
       containers:
       - name: haproxy
-        image: quay.io/haproxy:lts
+        image: docker.io/haproxy:lts
         ports:
         - containerPort: 2222
           name: ssh-proxy
         volumeMounts:
         - name: config
-          mountPath: /etc/haproxy
+          mountPath: /usr/local/etc/haproxy
         - name: ssh-proxy-tls
           mountPath: /etc/haproxy/certs
       volumes:
@@ -70,8 +71,13 @@ spec:
         configMap:
           name: ssh-proxy
       - name: ssh-proxy-tls
-        configMap:
-          name: ssh-proxy-tls
+        secret:
+          secretName: ssh-proxy-tls
+          items:
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.crt.key
 ---
 apiVersion: v1
 kind: Service
@@ -109,4 +115,31 @@ spec:
   wildcardPolicy: Subdomain
   tls:
     termination: passthrough
-    insecureEdgeTerminationPolicy: Redirect  
+    insecureEdgeTerminationPolicy: Redirect
+---
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ssh-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: ssh-proxy
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ssh-proxy-anyuid
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: ssh-proxy
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: ssh-proxy
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: system:openshift:scc:anyuid
+  apiGroup: rbac.authorization.k8s.io      

@@ -14,6 +14,12 @@ Make master schedulable (only needed if using the above lab which is small)
 oc patch schedulers.config.openshift.io cluster --type='json' -p='[{"op": "replace", "path": "/spec/mastersSchedulable", "value":true}]'
 ```
 
+Enable wildcard routes:
+
+```sh
+oc patch ingresscontroller/default -n openshift-ingress-operator --type=merge -p '{"spec":{"routeAdmission":{"wildcardPolicy":"WildcardsAllowed"}}}'
+```
+
 
 ### deploy kyverno
 

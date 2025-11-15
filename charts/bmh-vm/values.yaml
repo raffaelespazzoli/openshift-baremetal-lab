@@ -11,6 +11,8 @@ nodes:
 networkConfiguration: simple
 # whether the environment is disconnected or not 
 disconnectedEnvironment: false
+# whether the environment is proxied or not
+proxiedEnvironment: false
 
 #public key for accessing VMS (not the node), must be in the for that OCV expects
 sshPublicKeySecretName: ciao

@@ -1,0 +1,35 @@
+{{ if .Values.proxiedEnvironment }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: squid
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+  annotations:
+    k8s.v1.cni.cncf.io/networks: |
+      [
+        {
+          "name": "nm",
+          "interface": "nm",
+          "ips": ["192.168.3.5/24"]
+        }
+      ]
+spec:
+  replicas: 1 # Adjust replicas based on your needs
+  selector:
+    matchLabels:
+      app: squid
+  template:
+    metadata:
+      labels:
+        app: squid
+    spec:
+      containers:
+        - name: squid
+          image: docker.io/ubuntu/squid:latest # Or a custom image with your Squid configuration
+          ports:
+            - containerPort: 3128 # Default Squid port
+              name: squid
+              protocol: TCP
+{{ end }}

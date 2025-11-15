@@ -46,19 +46,14 @@ curl -I http://localhost/agent.x86_64.iso
 ### ISO mount and servers reset
 
 ```sh
-for server in master1 master2 master3 node1 node2 node3; do
-    system_id-=(curl -k -G "http://${server}-bmc:8000/redfish/v1/Systems/" | jq -r '.Members.[0]."@odata.id"')
-    curl -v -k -X POST \
-    https://${server}-bmc:8000${system_id}/VirtualMedia/Cd/Actions/VirtualMedia.InsertMedia \
-    -H 'Content-Type: application/json' \
-    -d '{"Image": "http://bastion-ssh:80/agent.x86_64.iso", "Inserted": true}'
+for server in master1 master2 master3 worker1 worker2 worker3; do
+    system_id=$(curl -k -G "http://${server}-bmc:8000/redfish/v1/Systems/" | jq -r '.Members.[0]."@odata.id"')
+    curl -v -k http://${server}-bmc:8000${system_id}/VirtualMedia/Cd/Actions/VirtualMedia.InsertMedia -H 'Content-Type: application/json' -d '{"Image": "http://bastion-ssh:80/agent.x86_64.iso", "Inserted": true}'
 done
 
-for server in master1 master2 master3 node1 node2 node3; do 
-    system_id-=(curl -k -G "http://${server}-bmc:8000/redfish/v1/Systems/" | jq -r '.Members.[0]."@odata.id"')
-    curl -d '{"ResetType":"On"}' \
-    -H "Content-Type: application/json" -X POST \
-     http://${server}-bmc:8000${system_id}/Actions/ComputerSystem.Reset
+for server in master1 master2 master3 worker1 worker2 worker3; do 
+    system_id=$(curl -k -G "http://${server}-bmc:8000/redfish/v1/Systems/" | jq -r '.Members.[0]."@odata.id"')
+    curl -d '{"ResetType":"On"}' -H "Content-Type: application/json" -X POST http://${server}-bmc:8000${system_id}/Actions/ComputerSystem.Reset
 done
 ```
 
