@@ -17,7 +17,7 @@ oc patch schedulers.config.openshift.io cluster --type='json' -p='[{"op": "repla
 Enable wildcard routes:
 
 ```sh
-oc patch ingresscontroller/default -n openshift-ingress-operator --type=merge -p '{"spec":{"routeAdmission":{"wildcardPolicy":"WildcardsAllowed"}}}'
+oc patch ingresscontroller/default -n openshift-ingress-operator --type=merge -p '{"spec":{"routeAdmission":{"wildcardPolicy":"WildcardsAllowed", "namespaceOwnership":"InterNamespaceAllowed"}}}'
 ```
 
 

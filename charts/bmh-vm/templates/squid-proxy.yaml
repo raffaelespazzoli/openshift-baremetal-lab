@@ -25,6 +25,7 @@ spec:
       labels:
         app: squid
     spec:
+      serviceAccountName: squid
       containers:
         - name: squid
           image: docker.io/ubuntu/squid:latest # Or a custom image with your Squid configuration
@@ -32,4 +33,30 @@ spec:
             - containerPort: 3128 # Default Squid port
               name: squid
               protocol: TCP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: squid
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: squid
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: squid-anyuid
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: squid
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: squid
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: system:openshift:scc:anyuid
+  apiGroup: rbac.authorization.k8s.io               
 {{ end }}

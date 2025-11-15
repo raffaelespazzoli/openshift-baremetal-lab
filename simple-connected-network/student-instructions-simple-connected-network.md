@@ -57,6 +57,19 @@ for server in master1 master2 master3 worker1 worker2 worker3; do
 done
 ```
 
+```sh
+for server in master1 master2 master3 worker1 worker2 worker3; do
+    session_id=$(curl -i -X POST -H "Content-Type: application/json" http://bm-lab-${server}-virtbmc.kubevirtbmc-system.svc.cluster.local/redfish/v1/SessionService/Sessions -d '{"UserName":"admin","Password":"password"}' | | grep X-Auth-Token | awk '{print $2}')
+    system_id=$(curl -k -G "http://${server}-bmc:8000/redfish/v1/Systems/" | jq -r '.Members.[0]."@odata.id"')
+    curl -H "X-Auth-Token: 1f555f911c02f8fa93290c4201d9f6039990089aa0b89ca66bf8dbf80ef01928" http://bm-lab-${server}-virtbmc.kubevirtbmc-system.svc:/redfish/v1/Systems/1/VirtualMedia/Cd/Actions/VirtualMedia.InsertMedia -H 'Content-Type: application/json' -d '{"Image": "http://bastion-ssh:80/agent.x86_64.iso", "Inserted": true}'
+done
+
+for server in master1 master2 master3 worker1 worker2 worker3; do 
+    system_id=$(curl -k -G "http://${server}-bmc:8000/redfish/v1/Systems/" | jq -r '.Members.[0]."@odata.id"')
+    curl -d '{"ResetType":"On"}' -H "Content-Type: application/json" -X POST http://${server}-bmc:8000${system_id}/Actions/ComputerSystem.Reset
+done
+```
+
 ### follow installation logs
 
 ```sh
