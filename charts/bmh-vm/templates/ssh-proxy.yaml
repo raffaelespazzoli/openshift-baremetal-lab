@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
       - name: haproxy
-        image: registry.connect.redhat.com:latest
+        image: registry.connect.redhat.com/haproxytech/haproxy:latest
         ports:
         - containerPort: 2222
           name: ssh-proxy
@@ -93,7 +93,7 @@ metadata:
   labels:
     {{- include "bmh-vm.labels" . | nindent 4 }}  
 spec:
-  host: '*.ssh-proxy-{{ .Release.Namespace }}.apps.etl6.ocp.rht-labs.com'
+  host: 'ssh-proxy-{{ .Release.Namespace }}.apps.etl6.ocp.rht-labs.com'
   to:
     kind: Service
     name: ssh-proxy

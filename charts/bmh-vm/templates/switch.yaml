@@ -190,7 +190,7 @@ spec:
       targetPort: 161
       name: snmp      
 ---
-{{ - if eq .Values.disconnectedEnvironment }}
+{{- if .Values.disconnectedEnvironment }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
