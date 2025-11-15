@@ -112,16 +112,11 @@ data:
         }
       }
       ge-0/0/2 {
-        unit 0 {
-          family inet {
-            address 192.168.1.1/24;
-          }
-        }
       }
       ge-0/0/3 {
         unit 0 {
           family inet {
-            address 192.168.2.1/24;
+            address 192.168.1.1/24;
           }
         }
       }
@@ -195,17 +190,19 @@ spec:
       targetPort: 161
       name: snmp      
 ---
-apiVersion: route.openshift.io/v1
-kind: Route
+{{ - if eq .Values.disconnectedEnvironment }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
 metadata:
-  name: switch
+  name: deny-egress
   namespace: {{ .Release.Namespace }}
   labels:
-    app: switch
     {{- include "bmh-vm.labels" . | nindent 4 }}
 spec:
-  port:
-    targetPort: http
-  to:
-    kind: Service
-    name: switch-ssh
+  podSelector:
+    matchLabels:
+      app: switch
+  policyTypes:
+  - Egress
+  egress: []
+{{- end }}

@@ -1,0 +1,27 @@
+baseDomain: bm-lab.local
+workerNodeCount: 3
+masterNodeCount: 3
+
+pullSecret: '${pull_secret}'
+sshKey: '${ssh_key}'
+
+
+nodes:
+  - name: master1
+    ip: 192.168.0.3 
+    macAddress: ${master1_macaddress}
+  - name: master2
+    ip: 192.168.0.4
+    macAddress: ${master2_macaddress} 
+  - name: master3
+    ip: 192.168.0.5 
+    macAddress: ${master3_macaddress} 
+  - name: worker1
+    ip: 192.168.0.6 
+    macAddress: ${worker1_macaddress} 
+  - name: worker2
+    ip: 192.168.0.7 
+    macAddress: ${worker2_macaddress} 
+  - name: worker3
+    ip: 192.168.0.8
+    macAddress: ${worker3_macaddress} 

@@ -1,0 +1,28 @@
+apiVersion: v1
+baseDomain: {{ .Values.baseDomain }}
+compute:
+- name: worker
+  replicas: {{ .Values.workerNodeCount }}
+controlPlane:
+  name: master
+  replicas: {{ .Values.masterNodeCount }}
+metadata:
+  name: {{ .Release.Name }}
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  networkType: OVNKubernetes
+  serviceNetwork:
+  - 172.30.0.0/16
+  machineNetwork:
+  - cidr: 192.168.0.0/24
+platform:
+  baremetal: 
+    apiVIPs:
+    - 192.168.0.9
+    ingressVIPs:
+    - 192.168.0.10
+fips: false
+pullSecret: '{{ .Values.pullSecret }}'
+sshKey: '{{ .Values.sshKey }}'

@@ -12,6 +12,34 @@ spec:
     role: Secondary
     ipam:
       mode: Disabled
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: st
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" . | nindent 4 }}
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: vm
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "bmh-vm.labels" . | nindent 4 }}
+spec:
+  topology: Layer2 
+  layer2: 
+    role: Secondary
+    ipam:
+      mode: Disabled            
 {{ else if eq .Values.networkConfiguration "bonds" }}
 {{ $dot := . }}
 {{ range .Values.nodes }}

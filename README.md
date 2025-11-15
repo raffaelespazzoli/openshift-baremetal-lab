@@ -54,7 +54,17 @@ kubectl port-forward -n bm-lab service/storage-ssh 10024:22 &
 ssh -p 10024 fedora@localhost
 
 kubectl port-forward -n bm-lab service/switch-ssh 10025:22 &
-ssh -p 10025 admin@localhost
+ssh -p 10025 admin@localhost #pwd admin@123
+```
+
+you should also be able to connect with this (currently not fullt tested)
+
+```sh
+ssh -o ProxyCommand="openssl s_client -quiet -connect bastion-ssh.sh-proxy-bm-lab.apps.etl6.ocp.rht-labs.com:2222 -servername bastion-ssh.sh-proxy-bm-lab.apps.etl6.ocp.rht-labs.com" fedora@bastion-ssh.sh-proxy-bm-lab.apps.etl6.ocp.rht-labs.com
+
+ssh -o ProxyCommand="openssl s_client -quiet -connect storage-ssh.sh-proxy-bm-lab.apps.etl6.ocp.rht-labs.com:2222 -servername storage-ssh.sh-proxy-bm-lab.apps.etl6.ocp.rht-labs.com" fedora@storage-ssh.sh-proxy-bm-lab.apps.etl6.ocp.rht-labs.com
+
+ssh -o ProxyCommand="openssl s_client -quiet -connect switch-ssh.sh-proxy-bm-lab.apps.etl6.ocp.rht-labs.com:2222 -servername switch-ssh.sh-proxy-bm-lab.apps.etl6.ocp.rht-labs.com" admin@switch-ssh.sh-proxy-bm-lab.apps.etl6.ocp.rht-labs.com #pwd admin@123
 ```
 
 

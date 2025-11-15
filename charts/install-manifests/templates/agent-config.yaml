@@ -1,0 +1,36 @@
+apiVersion: v1alpha1
+kind: AgentConfig
+metadata:
+  name: {{ .Release.Name }}
+rendezvousIP: {{ (index .Values.nodes 0).ip }}
+hosts:
+{{ $dot := .}}
+{{ range $index, $node := .Values.nodes }}
+- hostname: {{ $node.name }}.{{ $dot.Values.baseDomain }}
+  role: {{ if contains "master" $node.name }}master{{ else }}worker{{ end }}
+  interfaces:
+  - name: enp2s0
+    macAddress: '{{ $node.macAddress }}'
+  networkConfig:
+    interfaces:
+    - name: enp2s0
+      type: ethernet
+      state: up
+      mac-address: '{{ $node.macAddress }}'
+      ipv4:
+        enabled: true
+        address:
+        - ip: '{{ $node.ip }}'
+          prefix-length: 24
+        dhcp: false
+    dns-resolver:
+      config:
+        server:
+        - 192.168.3.3
+    routes:
+      config:
+      - destination: 0.0.0.0/0
+        next-hop-address: 192.168.0.1
+        next-hop-interface: enp2s0
+        table-id: 254
+{{ end }}          
