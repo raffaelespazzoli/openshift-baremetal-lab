@@ -111,7 +111,12 @@ spec:
               version: 2   
               ethernets:
                 enp2s0:
-                  addresses: [ "192.168.3.2/24" ]                              
+                  addresses: [ "192.168.3.2/24" ]
+                  routes:
+                    - to: 192.168.0.0/24 
+                      via: 192.168.3.1
+                    - to: 192.168.1.0/24 
+                      via: 192.168.3.1                                                                    
           name: cloudinitdisk
 ---
 apiVersion: v1

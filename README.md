@@ -21,18 +21,13 @@ oc patch ingresscontroller/default -n openshift-ingress-operator --type=merge -p
 ```
 
 
-### deploy kyverno
+### deploy kubevirt-redfish
 
 ```sh
-helm repo add kyverno https://kyverno.github.io/kyverno/
+helm repo add v1k0d3n https://v1k0d3n.github.io/charts
 helm repo update
-helm install kyverno kyverno/kyverno -n kyverno --create-namespace
-```
-
-### deploy bmc kyverno policy
-
-```sh
-oc apply -f ./kyverno/bmc-emulation-policy.yaml
+#there is a bug in this chart...
+helm install kubevirt-redfish v1k0d3n/kubevirt-redfish -n kubevirt-redfish --create-namespace -f ./kubevirt-redfish/values.yaml
 ```
 
 ### deploy lab helm chart

@@ -9,11 +9,11 @@ hosts:
 - hostname: {{ $node.name }}.{{ $dot.Values.baseDomain }}
   role: {{ if contains "master" $node.name }}master{{ else }}worker{{ end }}
   interfaces:
-  - name: enp2s0
+  - name: enp1s0
     macAddress: '{{ $node.macAddress }}'
   networkConfig:
     interfaces:
-    - name: enp2s0
+    - name: enp1s0
       type: ethernet
       state: up
       mac-address: '{{ $node.macAddress }}'
@@ -31,6 +31,6 @@ hosts:
       config:
       - destination: 0.0.0.0/0
         next-hop-address: 192.168.0.1
-        next-hop-interface: enp2s0
+        next-hop-interface: enp1s0
         table-id: 254
 {{ end }}          

@@ -27,7 +27,8 @@ coredns:
         {
           "name": "nm",
           "interface": "nm",
-          "ips": ["192.168.3.3/24"]
+          "ips": ["192.168.3.3/24"],
+          "default-route": ["192.168.3.1"]
         }
       ]
 
