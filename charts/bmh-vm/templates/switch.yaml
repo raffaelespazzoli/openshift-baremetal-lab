@@ -1,3 +1,4 @@
+{{- if eq .Values.switch "junos" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -124,7 +125,157 @@ data:
     {{- else if eq .Values.networkConfiguration "bonds" }}    
     interfaces {}
     {{- end }}                    
+{{- end }}
+{{- if eq .Values.switch "fedora" }}
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: switch
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: switch
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+spec:
+  dataVolumeTemplates:
+    - apiVersion: cdi.kubevirt.io/v1beta1
+      kind: DataVolume
+      metadata:
+        creationTimestamp: null
+        name: switch
+      spec:
+        sourceRef:
+          kind: DataSource
+          name: fedora
+          namespace: openshift-virtualization-os-images
+        storage:
+          resources:
+            requests:
+              storage: 100Gi
+  runStrategy: Always
+  template:
+    metadata:
+      annotations:
+        vm.kubevirt.io/flavor: small
+        vm.kubevirt.io/os: fedora
+        vm.kubevirt.io/workload: server
+        vm.redhat-cop.dns-name/nic-sapphire-roadrunner-92: fedora-vm1.lab.example.com
+      creationTimestamp: null
+      labels:
+        app: switch
+        kubevirt.io/domain: fedora-vm1
+        kubevirt.io/size: small
+        network.kubevirt.io/headlessService: headless
+        vm.redhat-cop.dns-name: "true"
+    spec:
+      architecture: amd64
+      domain:
+        cpu:
+          cores: 2
+          sockets: 1
+          threads: 1
+        devices:
+          disks:
+            - disk:
+                bus: virtio
+              name: rootdisk
+            - disk:
+                bus: virtio
+              name: cloudinitdisk
+          interfaces:
+            - masquerade: {}
+              name: default
+            - name: m
+              binding:
+                name: l2bridge
+            - name: vm
+              binding:
+                name: l2bridge
+            - name: st
+              binding:
+                name: l2bridge
+            - name: nm
+              binding:
+                name: l2bridge                                                
+          rng: {}
+        features:
+          acpi: {}
+          smm:
+            enabled: true
+        firmware:
+          bootloader:
+            efi: {}
+        machine:
+          type: pc-q35-rhel9.4.0
+        memory:
+          guest: 2Gi
+        resources: {}
+      networks:
+        - name: default
+          pod: {}
+        - multus:
+            networkName: m
+          name: m
+        - multus:
+            networkName: vm
+          name: vm
+        - multus:
+            networkName: st
+          name: st                              
+        - multus:
+            networkName: nm
+          name: nm
+      terminationGracePeriodSeconds: 180
+      accessCredentials:
+      - sshPublicKey:
+          source:
+            secret:
+              secretName: {{ .Values.sshPublicKeySecretName }}
+          propagationMethod:
+            noCloud: {}      
+      volumes:
+        - dataVolume:
+            name: switch
+          name: rootdisk
+        - cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              user: fedora
+              password: {{ .Values.password }}
+              chpasswd: { expire: False }     
+              runcmd:
+              - - sysctl -w net.ipv4.ip_forward=1
+              - echo "net.ipv4.ip_forward=1" | - tee -a /etc/sysctl.conf
+              # Set zones for interfaces
+              - firewall-cmd --zone=external --change-interface=enp1s0 --permanent
+              - firewall-cmd --zone=internal --change-interface=enp2s0 --permanent
+              - firewall-cmd --zone=internal --change-interface=enp3s0 --permanent
+              - firewall-cmd --zone=internal --change-interface=enp4s0 --permanent
+              - firewall-cmd --zone=internal --change-interface=enp5s0 --permanent              
 
+              # Enable masquerading (SNAT) on external zone
+              - firewall-cmd --zone=external --add-masquerade --permanent
+
+              # Allow forwarding from internal to external
+              - firewall-cmd --direct --add-rule ipv4 filter FORWARD 0 -i eth1 -o eth0 -j ACCEPT --permanent
+              - firewall-cmd --direct --add-rule ipv4 filter FORWARD 0 -i eth2 -o eth0 -j ACCEPT --permanent
+              - firewall-cmd --direct --add-rule ipv4 filter FORWARD 0 -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT --permanent
+              - firewall-cmd --direct --add-rule ipv4 filter FORWARD 0 -i eth0 -o eth2 -m state --state RELATED,ESTABLISHED -j ACCEPT --permanent
+
+              # Reload firewall
+              - firewall-cmd --reload                            
+            networkData: |-
+              version: 2   
+              ethernets:
+                enp2s0:
+                  addresses: [ "192.168.0.1/24" ]
+                enp3s0:
+                  addresses: [ "192.168.2.1/24" ] 
+                enp4s0:
+                  addresses: [ "192.168.1.1/24" ] 
+                enp5s0:
+                  addresses: [ "192.168.3.1/24" ]                                                                                                                          
+          name: cloudinitdisk
+{{- end }}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -169,6 +320,7 @@ spec:
       port: 22
       targetPort: 22
       name: ssh
+{{- if eq .Values.switch "junos" }}      
     - protocol: TCP
       port: 830
       targetPort: 830
@@ -188,7 +340,8 @@ spec:
     - protocol: TCP
       port: 161
       targetPort: 161
-      name: snmp      
+      name: snmp
+{{- end }}      
 ---
 {{- if .Values.disconnectedEnvironment }}
 apiVersion: networking.k8s.io/v1
@@ -206,3 +359,4 @@ spec:
   - Egress
   egress: []
 {{- end }}
+

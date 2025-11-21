@@ -6,16 +6,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "bmh-vm.labels" . | nindent 4 }}
-  annotations:
-    k8s.v1.cni.cncf.io/networks: |
-      [
-        {
-          "name": "nm",
-          "interface": "nm",
-          "ips": ["192.168.3.5/24"],
-          "default-route": ["192.168.3.1"]
-        }
-      ]
 spec:
   replicas: 1 # Adjust replicas based on your needs
   selector:
@@ -25,6 +15,16 @@ spec:
     metadata:
       labels:
         app: squid
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |
+          [
+            {
+              "name": "nm",
+              "interface": "nm",
+              "ips": ["192.168.3.5/24"],
+              "default-route": ["192.168.3.1"]
+            }
+          ]        
     spec:
       serviceAccountName: squid
       containers:
