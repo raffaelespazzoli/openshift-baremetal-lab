@@ -38,7 +38,7 @@ create a secret with your public key to be able to access the VMs
 oc new-project bm-lab
 oc create secret generic mykey --from-file=key1=${HOME}/.ssh/id_rsa.pub -n bm-lab
 #this is needed fr the juniper switch image which cannot be freely redistributed
-oc create secret docker-registry quay --docker-username=xxx --docker-password=xxx --docker-email=xxx --docker-server=quay.io -n bm-lab
+#oc create secret docker-registry quay --docker-username=xxx --docker-password=xxx --docker-email=xxx --docker-server=quay.io -n bm-lab
 ```
 
 ```sh

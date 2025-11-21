@@ -54,6 +54,6 @@ done
 ### follow installation logs
 
 ```sh
-./openshift-install --dir ./bm-lab-installation agent wait-for bootstrap-complete --log-level=info
+openshift-install --dir ./bm-lab-installation agent wait-for bootstrap-complete --log-level=info
 openshift-install --dir ./bm-lab-installation agent wait-for install-complete
 ```

@@ -145,6 +145,6 @@ spec:
     - ReadWriteMany 
   resources:
     requests:
-      storage: 100Gi 
+      storage: 200Gi 
   volumeMode: Block 
 {{ end }}      
