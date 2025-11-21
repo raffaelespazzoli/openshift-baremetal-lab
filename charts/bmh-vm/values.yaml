@@ -14,6 +14,9 @@ disconnectedEnvironment: false
 # whether the environment is proxied or not
 proxiedEnvironment: false
 
+# can be junos or fedora
+switch: fedora
+
 #public key for accessing VMS (not the node), must be in the for that OCV expects
 sshPublicKeySecretName: ciao
 # password for sshing into VMS
