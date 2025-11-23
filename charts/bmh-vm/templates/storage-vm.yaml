@@ -155,7 +155,10 @@ spec:
                     - to: 192.168.0.0/24 
                       via: 192.168.1.1
                     - to: 192.168.3.0/24 
-                      via: 192.168.1.1                  
+                      via: 192.168.1.1
+                  nameservers:  
+                    addresses: ["192.168.3.3"]
+                    search: ["bm-lab.local"]                                      
               {{- else if eq .Values.networkConfiguration "bonds" }}                  
                 enp2s0:
                   addresses: [ "192.168.1.2/24" ]
