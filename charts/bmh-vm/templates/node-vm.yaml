@@ -21,7 +21,6 @@ spec:
         kubevirt.io/domain: {{ .name }}
         network.kubevirt.io/headlessService: headless
         app: ocp-node
-        bmc-emulation: "true"
     spec:
       evictionStrategy: LiveMigrate
       architecture: amd64

@@ -106,7 +106,8 @@ spec:
               - [ systemctl, daemon-reload ]
               - [ systemctl, enable, httpd.service ]
               - [ systemctl, start, --no-block, httpd.service ]
-              - [ systemctl, mask, tmp.mount]              
+              - [ systemctl, mask, tmp.mount]
+              - umount /tmp              
             networkData: |-
               version: 2   
               ethernets:
