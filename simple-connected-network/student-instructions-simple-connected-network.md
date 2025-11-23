@@ -9,12 +9,13 @@ Assuming you are logged in into the cluster and pointing to your namespace, run 
 execute this from your laptop and from the git repo folder
 
 ```sh
-export ssh_key=$(cat ~/.ssh/id_rsa.pub) #replace here with the key you want to use.
+mkdir install-files
+ssh-keygen -t rsa -f ./install-files/id_rsa
+export ssh_key=$(cat ./install-files/id_rsa.pub)
 export pull_secret=$(oc get secret pull-secret -n openshift-config -o go-template='{{index .data ".dockerconfigjson" | base64decode}}')
 for node in master1 master2 master3 worker1 worker2 worker3; do
     export "${node}_macaddress"=$(oc get vm ${node} -o jsonpath='{.spec.template.spec.domain.devices.interfaces[0].macAddress}')
 done
-mkdir install-files
 envsubst < ./charts/install-manifests/values.yaml > ./install-files/values.yaml
 helm template bm-lab ./charts/install-manifests -f ./install-files/values.yaml --output-dir ./install-files
 echo $pull_secret > ./install-files/install-manifests/templates/pullsecret.json
@@ -28,8 +29,8 @@ now we ssh to the bastion, execute the following commands
 
 ```sh
 kubectl port-forward -n bm-lab service/bastion-ssh 10023:22 &
-
-scp -P 10023 ./install-files/install-manifests/templates/* fedora@localhost:/home/fedora 
+scp -P 10023 ./install-files/install-manifests/templates/* fedora@localhost:/home/fedora
+scp -P 10023 ./install-files/id_rsa fedora@localhost:/home/fedora/.ssh/ 
 ssh -p 10023 fedora@localhost
 oc adm release extract --command openshift-install quay.io/openshift-release-dev/ocp-release:4.20.3-x86_64 --registry-config ./pullsecret.json
 sudo mv openshift-install /usr/local/bin/openshift-install
@@ -56,4 +57,10 @@ done
 ```sh
 openshift-install --dir ./bm-lab-installation agent wait-for bootstrap-complete --log-level=info
 openshift-install --dir ./bm-lab-installation agent wait-for install-complete
+```
+
+### connect to a node to troubleshoot
+
+```sh
+ssh core@[node] 
 ```

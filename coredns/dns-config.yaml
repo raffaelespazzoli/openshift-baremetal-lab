@@ -15,11 +15,17 @@ data:
     ;
     @   IN NS  ns.bm-lab.local.
 
-    bastion   IN A   192.168.3.2
-    switch    IN A   192.168.3.1
-    master1   IN A   192.168.0.3
-    master2   IN A   192.168.0.4
-    master3   IN A   192.168.0.5
-    worker1   IN A   192.168.0.6    
-    worker2   IN A   192.168.0.7
-    worker3   IN A   192.168.0.8
+    bastion         IN A   192.168.3.2
+    switch          IN A   192.168.3.1
+    dns       IN A   192.168.3.3
+    ntp       IN A   192.168.3.4 
+    squid     IN A   192.168.3.5    
+    master1         IN A   192.168.0.3
+    master2         IN A   192.168.0.4
+    master3         IN A   192.168.0.5
+    worker1         IN A   192.168.0.6    
+    worker2         IN A   192.168.0.7
+    worker3         IN A   192.168.0.8
+    api-int.bm-lab  IN A   192.168.0.9
+    api.bm-lab      IN A   192.168.0.9
+    *.apps.bm-lab   IN A   192.168.0.10

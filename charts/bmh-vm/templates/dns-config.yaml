@@ -29,3 +29,6 @@ data:
     worker1   IN A   192.168.0.6    
     worker2   IN A   192.168.0.7
     worker3   IN A   192.168.0.8
+    api-int.bm-lab  IN A   192.168.0.9
+    api.bm-lab      IN A   192.168.0.9
+    *.apps.bm-lab   IN A   192.168.0.10    

@@ -98,6 +98,7 @@ spec:
   type: ClusterIP
 
 ---
+{{- if false }}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -116,6 +117,7 @@ spec:
   tls:
     termination: passthrough
     insecureEdgeTerminationPolicy: Redirect
+{{- end }}
 ---
 apiVersion: v1
 kind: ServiceAccount

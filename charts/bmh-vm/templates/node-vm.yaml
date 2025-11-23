@@ -72,7 +72,7 @@ spec:
           bootloader:
             efi: {}
         memory:
-          guest: 16Gi
+          guest: 32Gi
         resources: {}
       networks:
         {{ if eq $dot.Values.networkConfiguration "simple" }}
