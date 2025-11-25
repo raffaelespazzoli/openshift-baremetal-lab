@@ -7,16 +7,16 @@ metadata:
     {{- include "bmh-vm.labels" . | nindent 4 }}
 data:
   dns-config.txt: |
-    $ORIGIN {{ .Release.Namespace }}.local.
+    $ORIGIN {{ .Values.baseDomain }}.local.
     $TTL 3600
-    @   IN SOA ns.{{ .Release.Namespace }}.local. admin.{{ .Release.Namespace }}.local. (
+    @   IN SOA ns.{{ .Values.baseDomain }}.local. admin.{{ .Values.baseDomain }}.local. (
             2025110201 ; serial YYYYMMDDnn
             3600       ; refresh (1 hour)
             600        ; retry (10 minutes)
             604800     ; expire (1 week)
             86400 )    ; minimum (1 day)
     ;
-    @   IN NS  ns.{{ .Release.Namespace }}.local.
+    @   IN NS  ns.{{ .Values.baseDomain }}.local.
 
     switch    IN A   192.168.3.1
     bastion   IN A   192.168.3.2
@@ -29,6 +29,6 @@ data:
     worker1   IN A   192.168.0.6    
     worker2   IN A   192.168.0.7
     worker3   IN A   192.168.0.8
-    api-int.bm-lab  IN A   192.168.0.9
-    api.bm-lab      IN A   192.168.0.9
-    *.apps.bm-lab   IN A   192.168.0.10    
+    api-int.{{ .Values.clusterName }}  IN A   192.168.0.9
+    api.{{ .Values.clusterName }}      IN A   192.168.0.9
+    *.apps.{{ .Values.clusterName }}  IN A   192.168.0.10    

@@ -1,7 +1,7 @@
 apiVersion: v1alpha1
 kind: AgentConfig
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Values.clusterName }}
 rendezvousIP: {{ (index .Values.nodes 0).ip }}
 hosts:
 {{ $dot := .}}

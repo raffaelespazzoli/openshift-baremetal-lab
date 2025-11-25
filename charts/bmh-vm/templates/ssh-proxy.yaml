@@ -98,7 +98,7 @@ spec:
   type: ClusterIP
 
 ---
-{{- if false }}
+{{- if true }}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -107,7 +107,7 @@ metadata:
   labels:
     {{- include "bmh-vm.labels" . | nindent 4 }}  
 spec:
-  host: 'ssh-proxy-{{ .Release.Namespace }}.apps.etl6.ocp.rht-labs.com'
+  host: 'a.ssh-proxy.apps.etl6.ocp.rht-labs.com'
   to:
     kind: Service
     name: ssh-proxy

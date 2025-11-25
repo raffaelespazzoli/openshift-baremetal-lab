@@ -7,7 +7,7 @@ controlPlane:
   name: master
   replicas: {{ .Values.masterNodeCount }}
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Values.clusterName }}
 networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14

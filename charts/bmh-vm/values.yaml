@@ -7,6 +7,9 @@ nodes:
   - name: worker2
   - name: worker3
 
+clusterName: cluster1
+baseDomain: bm-lab.local  
+
 # network configuration for the lab. Valid values are simple, bonds
 networkConfiguration: simple
 # whether the environment is disconnected or not 

@@ -1,6 +1,7 @@
 baseDomain: bm-lab.local
 workerNodeCount: 3
 masterNodeCount: 3
+clusterName: cluster1
 
 pullSecret: '${pull_secret}'
 sshKey: '${ssh_key}'
