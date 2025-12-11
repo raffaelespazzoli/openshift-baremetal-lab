@@ -18,21 +18,21 @@ data:
       mode tcp
       timeout connect 5000
       timeout client 50000
-      timeout server 50000
-
+      timeout server 50000    
 
     frontend fe_ssh
       bind *:2222 ssl crt /etc/haproxy/certs
       mode tcp
-      log-format "%ci:%cp [%t] %ft %b/%s %Tw/%Tc/%Tt %B %ts %ac/%fc/%bc/%sc/%rc %sq/%bq dst:%[var(sess.dst)] "
-      tcp-request content set-var(sess.dst) ssl_fc_sni
+      log-format "%ci:%cp [%t] %ft %b/%s %Tw/%Tc/%Tt %B %ts %ac/%fc/%bc/%sc/%rc %sq/%bq hostname:%[var(sess.hostname)] dst_host:%[var(sess.dst_host)] dst_ip:%[var(sess.dst_ip)] "
+      tcp-request content set-var(sess.hostname) ssl_fc_sni,field(1,'.')
       default_backend ssh-all
 
 
     backend ssh-all
       mode tcp
-      tcp-request content set-var(sess.full_host) var(sess.dst_name),concat(".{{ .Release.Namespace }}.svc")
-      tcp-request content do-resolve(sess.dst_ip,default,ipv4) var(sess.full_host)
+      tcp-request inspect-delay 5s
+      tcp-request content set-var(sess.dst_host) var(sess.hostname),concat(".{{ .Release.Namespace }}.svc.cluster.local")
+      tcp-request content do-resolve(sess.dst_ip,default,ipv4) var(sess.dst_host)
       tcp-request content set-dst var(sess.dst_ip)
       server ssh 0.0.0.0:22
 
@@ -86,8 +86,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "bmh-vm.labels" . | nindent 4 }}
-  annotations :
-    service.beta.openshift.io/serving-cert-secret-name: ssh-proxy-tls
 spec:
   selector:
     app: ssh-proxy
@@ -143,4 +141,19 @@ subjects:
 roleRef:
   kind: ClusterRole
   name: system:openshift:scc:anyuid
-  apiGroup: rbac.authorization.k8s.io      
+  apiGroup: rbac.authorization.k8s.io
+---  
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ssh-proxy-tls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+spec:
+  secretName: ssh-proxy-tls
+  dnsNames:
+  - "*.ssh-proxy.apps.etl6.ocp.rht-labs.com"
+  issuerRef:
+    name: letsencrypt-issuer
+    kind: ClusterIssuer
