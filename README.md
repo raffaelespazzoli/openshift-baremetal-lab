@@ -37,36 +37,28 @@ create a secret with your public key to be able to access the VMs
 ```sh
 oc new-project bm-lab
 oc create secret generic mykey --from-file=key1=${HOME}/.ssh/id_rsa.pub -n bm-lab
-#this is needed for the juniper switch image which cannot be freely redistributed
-#oc create secret docker-registry quay --docker-username=xxx --docker-password=xxx --docker-email=xxx --docker-server=quay.io -n bm-lab
 ```
 
 ```sh
 helm upgrade -i bm-lab ./charts/bmh-vm -n bm-lab --create-namespace --set sshPublicKeySecretName=mykey --set password=mypwd
 ```
 
-
 connect via ssh to bastion, storage, switch
 
+add this to you `.ssh.config`
+
 ```sh
-kubectl port-forward -n bm-lab service/bastion-ssh 10023:22 &
-ssh -p 10023 fedora@localhost
-
-kubectl port-forward -n bm-lab service/storage-ssh 10024:22 &
-ssh -p 10024 fedora@localhost
-
-kubectl port-forward -n bm-lab service/switch-ssh 10025:22 &
-ssh -p 10025 admin@localhost #pwd admin@123
+Host *.cnv
+  IdentityFile .ssh/id_rsa.pub
+  ProxyCommand virtctl port-forward --stdio=true vmi/$(echo %h| awk -F'.' '{print $1}').$(echo %h| awk -F'.' '{print $2}') %p
+  UserKnownHostsFile=/dev/null
+  StrictHostKeyChecking no
 ```
 
-you should also be able to connect with this (currently not fullt tested)
-
 ```sh
-ssh -o ProxyCommand="openssl s_client -connect bastion-ssh.ssh-proxy.apps.etl6.ocp.rht-labs.com:443 -servername bastion-ssh.ssh-proxy.apps.etl6.ocp.rht-labs.com" fedora@bastion-ssh
-
-ssh -o ProxyCommand="openssl s_client -quiet -connect storage-ssh.sh-proxy.apps.etl6.ocp.rht-labs.com:443 -servername storage-ssh.sh-proxy.apps.etl6.ocp.rht-labs.com" fedora@storage-ssh
-
-ssh -o ProxyCommand="openssl s_client -quiet -connect switch-ssh.sh-proxy.apps.etl6.ocp.rht-labs.com:443 -servername switch-ssh.sh-proxy.apps.etl6.ocp.rht-labs.com" admin@switch-ssh.sh-proxy #pwd admin@123
+ssh fedora@bastion.bm-lab.cnv
+ssh fedora@storage.bm-lab.cnv
+ssh fedora@switch.bm-lab.cnv
 ```
 
 
