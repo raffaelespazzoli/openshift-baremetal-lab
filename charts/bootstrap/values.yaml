@@ -1,0 +1,10 @@
+# valid values are connected, disconnected, proxied
+environmentConnectivity: connected
+
+# valid values are simple, bonds
+environmentNetworking: simple
+
+# allowed values is 1 for now.
+numStudents: 1
+
+clusterBaseDomain: etl6.ocp.rht-labs.com

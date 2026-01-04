@@ -1,0 +1,28 @@
+{{ range $index, $_ := until .Values.numStudents -}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bm-lab-{{ add $index 1 }}
+  namespace: openshift-gitops
+  labels:
+    {{- include "bootstrap.labels" . | nindent 4 }}  
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/raffaelespazzoli/openshift-baremetal-lab.git
+    targetRevision: HEAD
+    path: charts/bmh-vm
+    helm:
+      values: |
+        clusterName: cluster-{{ add $index 1 }}
+        baseDomain: bm-lab.local
+        networkConfiguration: {{ $.Values.environmentNetworking }}
+        disconnectedEnvironment: {{ eq $.Values.environmentConnectivity "disconnected" }}
+        proxiedEnvironment: {{ eq $.Values.environmentConnectivity "proxied" }}
+        sshPublicKeySecretName: ssh-key
+        password: mypwd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: bm-lab-{{ add $index 1 }}
+{{- end }}
