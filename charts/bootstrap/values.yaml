@@ -5,6 +5,6 @@ environmentConnectivity: connected
 environmentNetworking: simple
 
 # allowed values is 1 for now.
-numStudents: 1
+numStudents: 1 
 
 clusterBaseDomain: etl6.ocp.rht-labs.com

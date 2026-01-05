@@ -34,7 +34,7 @@ spec:
           iso_download_timeout: "30m"  
 
         chassis:
-        {{ range $index, $_ := until .Values.numStudents -}}
+        {{ range $index, $_ := until (.Values.numStudents | int) -}}
           - name: "chassis-{{ add $index 1 }}"
             namespace: "bm-lab"
             service_account: "default"
@@ -42,7 +42,7 @@ spec:
         {{- end }}
         authentication:
           users:
-          {{ range $index, $_ := until .Values.numStudents -}}
+          {{ range $index, $_ := until (.Values.numStudents | int) -}}
             - username: "admin"
               password: "changeme"  # CHANGE THIS PASSWORD!
               chassis: ["chassis-{{ add $index 1 }}"]
