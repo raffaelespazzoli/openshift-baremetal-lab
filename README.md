@@ -2,7 +2,7 @@
 
 these insructions will setup a lab with the following architecture:
 
-![OpenShift baremetal lab architecture](./media/bm-build.drawio.png)
+![OpenShift baremetal lab architecture](./media/bm-build.jpg)
 
 ## quick instructions
 
