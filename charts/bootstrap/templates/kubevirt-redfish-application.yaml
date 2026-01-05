@@ -12,7 +12,7 @@ spec:
     targetRevision: HEAD
     path: charts/kubevirt-redfish
     helm:
-      values: |
+      values: |-
         route:
           enabled: true
           host: "kubevirt-redfish-kubevirt-redfish.apps.{{ .Values.clusterBaseDomain }}"
