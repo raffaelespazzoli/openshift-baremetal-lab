@@ -12,7 +12,7 @@ spec:
     targetRevision: HEAD
     path: charts/kubevirt-redfish
     helm:
-      values: |-
+      valuesObject: 
         route:
           enabled: true
           host: "kubevirt-redfish-kubevirt-redfish.apps.{{ .Values.clusterBaseDomain }}"
@@ -44,7 +44,7 @@ spec:
           users:
           {{ range $index, $_ := until (.Values.numStudents | int) -}}
             - username: "admin"
-              password: "changeme"  # CHANGE THIS PASSWORD!
+              password: "changeme"
               chassis: ["chassis-{{ add $index 1 }}"]
           {{- end }}    
   destination:
