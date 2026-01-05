@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    chart: kubevirt-redfish
-    repoURL: https://v1k0d3n.github.io/charts
-    targetRevision: 0.2.3
+    repoURL: https://github.com/raffaelespazzoli/openshift-baremetal-lab.git
+    targetRevision: HEAD
+    path: charts/kubevirt-redfish
     helm:
       values: |
         route:
