@@ -21,9 +21,11 @@ spec:
         networkConfiguration: {{ $.Values.environmentNetworking }}
         disconnectedEnvironment: {{ eq $.Values.environmentConnectivity "disconnected" }}
         proxiedEnvironment: {{ eq $.Values.environmentConnectivity "proxied" }}
-        sshPublicKeySecretName: ssh-key
-        password: mypwd
+        password: changeme
   destination:
     server: https://kubernetes.default.svc
     namespace: bm-lab-{{ add $index 1 }}
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true    
 {{- end }}

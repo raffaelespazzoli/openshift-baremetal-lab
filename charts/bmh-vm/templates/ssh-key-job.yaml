@@ -1,0 +1,65 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "ssh-key"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "ssh-key"
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: post-install-job
+        image: registry.access.redhat.com/openshift4/ose-tools-rhel9:latest
+        command: ["/bin/bash", "/scripts/entrypoint.sh"]
+        volumeMounts:
+        - name: script-volume
+          mountPath: /scripts
+      volumes:
+      - name: script-volume
+        configMap:
+          name: ssh-key-script
+          defaultMode: 0755       
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "ssh-key-script"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+data:
+  entrypoint.sh: |
+    #!/bin/bash
+    set -e  
+    ssh-keygen -t rsa -b 4096 -f /tmp/id_rsa -q -N ""
+    oc create secret generic {{ .Values.sshPublicKeySecretName }} \
+      --from-file=ssh-publickey=/tmp/id_rsa.pub \
+      --from-file=ssh-privatekey=/tmp/id_rsa \
+      --from-file=key1=/dev/id_rsa.pub \
+      -n {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "ssh-key-edit"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "bmh-vm.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: {{ .Release.Namespace }}
