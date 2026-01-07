@@ -19,7 +19,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: post-install-job
-        image: registry.access.redhat.com/openshift4/ose-tools-rhel9:latest
+        image: registry.redhat.io/openshift4/ose-tools-rhel9:latest
         command: ["/bin/bash", "/scripts/entrypoint.sh"]
         volumeMounts:
         - name: script-volume
