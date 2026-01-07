@@ -21,7 +21,7 @@ proxiedEnvironment: false
 switch: fedora
 
 #public key for accessing VMS (not the node), must be in the for that OCV expects
-sshPublicKeySecretName: ciao
+sshPublicKeySecretName: ssh-key
 # password for sshing into VMS
 password: j7q5-vkj6-5pcr
 
