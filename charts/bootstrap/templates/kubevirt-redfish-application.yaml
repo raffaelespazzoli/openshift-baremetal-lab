@@ -3,6 +3,10 @@ kind: Application
 metadata:
   name: kubevirt-redfish
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io      
   labels:
     {{- include "bootstrap.labels" . | nindent 4 }}  
 spec:
@@ -51,5 +55,14 @@ spec:
     server: https://kubernetes.default.svc
     namespace: kubevirt-redfish
   syncPolicy:
+    automated:
+      selfHeal: true
     syncOptions:
-    - CreateNamespace=true    
+      - ApplyOutOfSyncOnly=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - ServerSideApply=true
+      - FailOnSharedResource=true
+      - RespectIgnoreDifferences=true
+      - CreateNamespace=true
+        
