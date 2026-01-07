@@ -39,5 +39,12 @@ spec:
       - ServerSideApply=true
       - FailOnSharedResource=true
       - RespectIgnoreDifferences=true
-      - CreateNamespace=true   
+      - CreateNamespace=true
+  ignoreDifferences:
+  - group: kubevirt.io
+    kind: VirtualMachine
+    jsonPointers:      
+      - /spec/running
+    jqPathExpressions:    
+      - spec.template.spec.domain.devices.interfaces[].macAddress       
 {{- end }}
