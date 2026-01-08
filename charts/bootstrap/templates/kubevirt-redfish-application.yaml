@@ -33,7 +33,7 @@ spec:
         datavolume:
           storage_size: "20Gi"
           allow_insecure_tls: true
-          storage_class: ontap-san
+          storage_class: {{ .Values.storageClassName }}
           vm_update_timeout: "2m"
           iso_download_timeout: "30m"  
 

@@ -26,6 +26,7 @@ spec:
         disconnectedEnvironment: {{ eq $.Values.environmentConnectivity "disconnected" }}
         proxiedEnvironment: {{ eq $.Values.environmentConnectivity "proxied" }}
         password: changeme
+        storageClassName: {{ $.Values.storageClassName }}
   destination:
     server: https://kubernetes.default.svc
     namespace: bm-lab-{{ add $index 1 }}

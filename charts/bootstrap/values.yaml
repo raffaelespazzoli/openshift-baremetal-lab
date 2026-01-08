@@ -7,4 +7,6 @@ environmentNetworking: simple
 # allowed values is 1 for now.
 numStudents: 1 
 
+storageClassName: ontap-san
+
 clusterBaseDomain: etl6.ocp.rht-labs.com

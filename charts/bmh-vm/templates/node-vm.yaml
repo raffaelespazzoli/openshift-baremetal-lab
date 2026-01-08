@@ -139,7 +139,7 @@ metadata:
     app: ocp-node
     {{- include "bmh-vm.labels" $dot | nindent 4 }}    
 spec:
-  storageClassName: ontap-san
+  storageClassName: {{ $dot.Values.storageClassName }}
   accessModes:  
     - ReadWriteMany 
   resources:

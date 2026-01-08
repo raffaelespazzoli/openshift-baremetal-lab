@@ -25,6 +25,9 @@ sshPublicKeySecretName: ssh-key
 # password for sshing into VMS
 password: j7q5-vkj6-5pcr
 
+# storage class to use for VMs
+storageClassName: ontap-san
+
 # coddns additional configuration
 coredns:
   podAnnotations:
