@@ -101,7 +101,7 @@ spec:
               - jq      
               runcmd:
               - mkdir -p /home/fedora/oc
-              - curl -fsSL https://downloads-openshift-console.apps.etl6.ocp.rht-labs.com/amd64/linux/oc.tar | tar -C /home/fedora/oc -xvf - 
+              - curl -fsSL https://downloads-openshift-console.apps.{{ .Values.hostingClusterBaseDomain }}/amd64/linux/oc.tar | tar -C /home/fedora/oc -xvf - 
               - mv /home/fedora/oc/oc /usr/local/bin/oc
               - [ systemctl, daemon-reload ]
               - [ systemctl, enable, httpd.service ]

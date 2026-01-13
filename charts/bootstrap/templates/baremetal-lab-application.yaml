@@ -27,6 +27,7 @@ spec:
         proxiedEnvironment: {{ eq $.Values.environmentConnectivity "proxied" }}
         password: changeme
         storageClassName: {{ $.Values.storageClassName }}
+        hostingClusterBaseDomain: {{ $.Values.clusterBaseDomain }}
   destination:
     server: https://kubernetes.default.svc
     namespace: bm-lab-{{ add $index 1 }}

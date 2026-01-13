@@ -40,7 +40,7 @@ oc create secret generic mykey --from-file=key1=${HOME}/.ssh/id_rsa.pub -n bm-la
 ```
 
 ```sh
-helm upgrade -i bm-lab ./charts/bmh-vm -n bm-lab --create-namespace --set sshPublicKeySecretName=mykey --set password=mypwd
+helm upgrade -i bm-lab ./charts/bmh-vm -n bm-lab --create-namespace --set sshPublicKeySecretName=mykey --set password=mypwd --set hostingClusterBaseDomain=$(oc get dns.config/cluster -o jsonpath='{.spec.baseDomain}')
 ```
 
 connect via ssh to bastion, storage, switch

@@ -10,6 +10,8 @@ nodes:
 clusterName: cluster1
 baseDomain: bm-lab.local  
 
+hostingClusterBaseDomain: example.com
+
 # network configuration for the lab. Valid values are simple, bonds
 networkConfiguration: simple
 # whether the environment is disconnected or not 
