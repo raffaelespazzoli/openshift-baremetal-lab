@@ -46,13 +46,20 @@ metadata:
 data:
   entrypoint.sh: |
     #!/bin/bash
-    set -e  
-    ssh-keygen -t rsa -b 4096 -f /tmp/id_rsa -q -N ""
-    oc create secret generic {{ .Values.sshPublicKeySecretName }} \
-      --from-file=ssh-publickey=/tmp/id_rsa.pub \
-      --from-file=ssh-privatekey=/tmp/id_rsa \
-      --from-file=key1=/tmp/id_rsa.pub \
-      -n {{ .Release.Namespace }}
+    if ! oc get secret {{ .Values.sshPublicKeySecretName }} -n {{ .Release.Namespace }} &> /dev/null; then
+      echo "Creating SSH key secret {{ .Values.sshPublicKeySecretName }} in namespace {{ .Release.Namespace }}"
+      set -e  
+      ssh-keygen -t rsa -b 4096 -f /tmp/id_rsa -q -N ""
+      oc create secret generic {{ .Values.sshPublicKeySecretName }} \
+        --from-file=ssh-publickey=/tmp/id_rsa.pub \
+        --from-file=ssh-privatekey=/tmp/id_rsa \
+        --from-file=key1=/tmp/id_rsa.pub \
+        -n {{ .Release.Namespace }}
+    else
+      echo "SSH key secret {{ .Values.sshPublicKeySecretName }} already exists in namespace {{ .Release.Namespace }}, skipping creation"
+      exit 0
+    fi
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
