@@ -33,7 +33,7 @@ spec:
     namespace: bm-lab-{{ add $index 1 }}
   syncPolicy:
     automated:
-      selfHeal: true
+      selfHeal: false
     syncOptions:
       - ApplyOutOfSyncOnly=true
       - PrunePropagationPolicy=foreground
