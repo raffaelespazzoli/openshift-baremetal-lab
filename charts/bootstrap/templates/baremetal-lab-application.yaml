@@ -32,8 +32,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: bm-lab-{{ add $index 1 }}
   syncPolicy:
-    automated:
-      selfHeal: false
     syncOptions:
       - ApplyOutOfSyncOnly=true
       - PrunePropagationPolicy=foreground
