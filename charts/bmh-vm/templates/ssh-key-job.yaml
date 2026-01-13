@@ -9,7 +9,7 @@ metadata:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
     "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
@@ -42,7 +42,7 @@ metadata:
     # job is considered part of the release.
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": hook-succeeded    
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded    
 data:
   entrypoint.sh: |
     #!/bin/bash
@@ -73,7 +73,7 @@ metadata:
     # job is considered part of the release.
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": hook-succeeded    
+    "helm.sh/hook-delete-policy": before-hook-created,hook-succeeded    
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
