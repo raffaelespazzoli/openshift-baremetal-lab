@@ -51,10 +51,9 @@ ssh -i ./install-files/id_rsa fedora@bastion.bm-lab-${student_numeral}.cnv
 
 now we ssh to the bastion, execute the following commands
 
-### iso prepareation
+### iso preparation
 
 ```sh
-kubectl port-forward -n bm-lab service/bastion-ssh 10023:22 &
 scp -i ./install-files/id_rsa ./install-files/install-manifests/templates/* fedora@bastion.bm-lab-${student_numeral}.cnv:/home/fedora
 scp -i ./install-files/id_rsa ./install-files/id_rsa fedora@bastion.bm-lab-${student_numeral}.cnv:/home/fedora/.ssh/ 
 ssh -i ./install-files/id_rsa fedora@bastion.bm-lab-${student_numeral}.cnv

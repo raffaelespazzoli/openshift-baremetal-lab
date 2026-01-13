@@ -40,14 +40,14 @@ spec:
         chassis:
         {{- range $index, $_ := until (.Values.numStudents | int) }}
           - name: "chassis-{{ add $index 1 }}"
-            namespace: "bm-lab"
+            namespace: "bm-lab-{{ add $index 1 }}"
             service_account: "default"
             description: "My ocp-virt cluster with test VMs"
         {{- end }}
         authentication:
           users:
           {{- range $index, $_ := until (.Values.numStudents | int) }}
-            - username: "admin"
+            - username: "admin-{{ add $index 1 }}"
               password: "changeme"
               chassis: ["chassis-{{ add $index 1 }}"]
           {{- end }}    
