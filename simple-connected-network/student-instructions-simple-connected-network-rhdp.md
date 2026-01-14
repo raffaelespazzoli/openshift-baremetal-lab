@@ -78,6 +78,8 @@ for server in master1 master2 master3 worker1 worker2 worker3; do
 done
 ```
 
+after this command the VM will reboot from cdrom. Becayuse the VMs do not shutdown cleanly and the cdrom volume population is slow, this steps takes a few minutes.
+
 ### follow installation logs
 
 ```sh
