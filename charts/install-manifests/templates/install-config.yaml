@@ -26,3 +26,9 @@ platform:
 fips: false
 pullSecret: '{{ .Values.pullSecret }}'
 sshKey: '{{ .Values.sshKey }}'
+{{- if .Values.proxiedEnvironment }}
+proxy:
+  httpProxy: http://squid.bm-lab.local:3128
+  httpsProxy: http://squid.bm-lab.local:3128
+  noProxy: .cluster.local,.svc,localhost,127.0.0.1,172.30.0.0/16,192.168.0.0/24,10.128.0.0/14
+{{- end }}

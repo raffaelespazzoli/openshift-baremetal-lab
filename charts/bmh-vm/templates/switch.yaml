@@ -258,26 +258,42 @@ stringData:
     user: fedora
     password: {{ .Values.password }}
     chpasswd: { expire: False }                  
+    packages:
+    - firewalld
     runcmd:
+    # Allow forwarding from NIC to NIC in kernel
     - sysctl -w net.ipv4.ip_forward=1
     - echo "net.ipv4.ip_forward=1" | tee -a /etc/sysctl.conf                        
-    # Add the rule
-    # Create the nat table if it doesn't exist
-    - nft add table ip nat
 
-    # Create the postrouting chain if it doesn't exist
-    - nft add chain ip nat postrouting { type nat hook postrouting priority 100 \; }
+    - systemctl enable --now firewalld
 
-    # Add the masquerade rule
-    - nft add rule ip nat postrouting oifname "enp1s0" masquerade
+    # log dropped packets for debugging issues
+    # use `journalctl -k [-f]` to monitor
+    - firewall-cmd --set-log-denied=unicast
+    - firewall-cmd --runtime-to-permanent
+    # Move pod network to "external" zone
+    - nmcli connection modify "Wired connection 1" connection.zone external
+    # Move 192.168.x interfaces to "internal" zone
+    - nmcli connection modify "cloud-init enp2s0" connection.zone internal
+    - nmcli connection modify "cloud-init enp3s0" connection.zone internal
+    - nmcli connection modify "cloud-init enp4s0" connection.zone internal
+    - nmcli connection modify "cloud-init enp5s0" connection.zone internal
 
-    # Save current ruleset
-    - nft list ruleset | sudo tee /etc/nftables.conf
+    # create a policy to govern traffic between internal subnets and pod network
+    - firewall-cmd --permanent --new-policy int-to-ext
+    - firewall-cmd --permanent --policy=int-to-ext --add-ingress-zone=internal
+    - firewall-cmd --permanent --policy=int-to-ext --add-egress-zone=external
 
-    # Enable nftables service
-    - systemctl enable nftables
-    - systemctl start nftables
-    
+    # set policy target to ACCEPT to accept packets or CONTINUE to drop them
+    # do not set to DROP as it interferes with intra-zone forwarding
+{{- if .Values.proxiedEnvironment }}
+    - firewall-cmd --permanent --policy=int-to-ext --set-target=CONTINUE
+    # allow traffic from the squid proxy 
+    - firewall-cmd --permanent --zone=external --add-source=192.168.3.5/32
+{{- else }}
+    - firewall-cmd --permanent --policy=int-to-ext --set-target=ACCEPT
+{{- end }}
+    - firewall-cmd --reload
   networkdata: |-
     network:
       version: 2   
