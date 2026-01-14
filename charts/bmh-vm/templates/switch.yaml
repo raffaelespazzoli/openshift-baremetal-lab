@@ -262,38 +262,24 @@ stringData:
     - firewalld                   
     runcmd:
     - sysctl -w net.ipv4.ip_forward=1
-    - echo "net.ipv4.ip_forward=1" | tee -a /etc/sysctl.conf
-    # # Set zones for interfaces
-    # - [ systemctl, daemon-reload ]
-    # - [ systemctl, enable, firewalld.service ]
-    # - [ systemctl, start, --no-block, firewalld.service ]
-    # - sleep 10        
-    # - firewall-cmd --zone=external --change-interface=enp1s0 --permanent
-    # - firewall-cmd --zone=internal --change-interface=enp2s0 --permanent
-    # - firewall-cmd --zone=internal --change-interface=enp3s0 --permanent
-    # - firewall-cmd --zone=internal --change-interface=enp4s0 --permanent
-    # - firewall-cmd --zone=internal --change-interface=enp5s0 --permanent              
-
-    # # Enable masquerading (SNAT) on external zone
-    # - firewall-cmd --zone=external --add-masquerade --permanent
-
-    # # Allow forwarding from internal to external
-    # - firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp2s0 -o enp1s0 -j ACCEPT 
-    # - firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp3s0 -o enp1s0 -j ACCEPT 
-    # - firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp4s0 -o enp1s0 -j ACCEPT 
-    # - firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp5s0 -o enp1s0 -j ACCEPT                           
-    # - firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp1s0 -o enp2s0 -m state --state RELATED,ESTABLISHED -j ACCEPT 
-    # - firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp1s0 -o enp3s0 -m state --state RELATED,ESTABLISHED -j ACCEPT 
-    # - firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp1s0 -o enp4s0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-    # - firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i enp1s0 -o enp5s0 -m state --state RELATED,ESTABLISHED -j ACCEPT                
-
-    # # Reload firewall
-    # - firewall-cmd --reload                            
+    - echo "net.ipv4.ip_forward=1" | tee -a /etc/sysctl.conf                        
     # Add the rule
-    - iptables -t nat -A POSTROUTING -o enp1s0 -j MASQUERADE
+    # Create the nat table if it doesn't exist
+    - nft add table ip nat
 
-    # Save it (Fedora/RHEL)
-    - iptables-save | sudo tee /etc/sysconfig/iptables              
+    # Create the postrouting chain if it doesn't exist
+    - nft add chain ip nat postrouting { type nat hook postrouting priority 100 \; }
+
+    # Add the masquerade rule
+    - nft add rule ip nat postrouting oifname "enp1s0" masquerade
+
+    # Save current ruleset
+    - nft list ruleset | sudo tee /etc/nftables.conf
+
+    # Enable nftables service
+    - systemctl enable nftables
+    - systemctl start nftables
+    
   networkdata: |-
     network:
       version: 2   
