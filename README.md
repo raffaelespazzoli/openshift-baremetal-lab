@@ -49,7 +49,7 @@ add this to you `.ssh.config`
 
 ```sh
 Host *.cnv
-  IdentityFile .ssh/id_rsa.pub
+  IdentityFile .ssh/id_rsa
   ProxyCommand virtctl port-forward --stdio=true vmi/$(echo %h| awk -F'.' '{print $1}').$(echo %h| awk -F'.' '{print $2}') %p
   UserKnownHostsFile=/dev/null
   StrictHostKeyChecking no
