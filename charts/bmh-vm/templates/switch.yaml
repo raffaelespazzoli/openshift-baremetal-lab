@@ -257,9 +257,7 @@ stringData:
     #cloud-config
     user: fedora
     password: {{ .Values.password }}
-    chpasswd: { expire: False }
-    packages:
-    - firewalld                   
+    chpasswd: { expire: False }                  
     runcmd:
     - sysctl -w net.ipv4.ip_forward=1
     - echo "net.ipv4.ip_forward=1" | tee -a /etc/sysctl.conf                        

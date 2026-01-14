@@ -72,6 +72,7 @@ curl -I http://localhost/agent.x86_64.iso
 ### ISO mount and servers reset
 
 ```sh
+export student_numeral=1
 for server in master1 master2 master3 worker1 worker2 worker3; do
     curl -u admin-${student_numeral}:changeme -v -k http://kubevirt-redfish.kubevirt-redfish.svc.cluster.local:8443/redfish/v1/Systems/${server}/VirtualMedia/Cd/Actions/VirtualMedia.InsertMedia -H 'Content-Type: application/json' -d '{"Image": "http://bastion-ssh:80/agent.x86_64.iso", "Inserted": true}'
 done
