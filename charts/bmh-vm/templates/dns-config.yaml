@@ -7,16 +7,16 @@ metadata:
     {{- include "bmh-vm.labels" . | nindent 4 }}
 data:
   dns-config.txt: |
-    $ORIGIN {{ .Values.baseDomain }}.local.
+    $ORIGIN {{ .Values.baseDomain }}.
     $TTL 3600
-    @   IN SOA ns.{{ .Values.baseDomain }}.local. admin.{{ .Values.baseDomain }}.local. (
+    @   IN SOA ns.{{ .Values.baseDomain }}. admin.{{ .Values.baseDomain }}. (
             2025110201 ; serial YYYYMMDDnn
             3600       ; refresh (1 hour)
             600        ; retry (10 minutes)
             604800     ; expire (1 week)
             86400 )    ; minimum (1 day)
     ;
-    @   IN NS  ns.{{ .Values.baseDomain }}.local.
+    @   IN NS  ns.{{ .Values.baseDomain }}.
 
     switch    IN A   192.168.3.1
     bastion   IN A   192.168.3.2
