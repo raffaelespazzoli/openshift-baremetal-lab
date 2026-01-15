@@ -84,7 +84,7 @@ after this command the VM will reboot from cdrom. Becayuse the VMs do not shutdo
 
 ```sh
 openshift-install --dir ./bm-lab-installation agent wait-for bootstrap-complete --log-level=info
-openshift-install --dir ./bm-lab-installation agent wait-for install-complete
+openshift-install --dir ./bm-lab-installation agent wait-for install-complete --log-level=info
 ```
 
 ### connect to a node to troubleshoot
