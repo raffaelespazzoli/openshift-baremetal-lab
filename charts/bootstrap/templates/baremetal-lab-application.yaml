@@ -46,5 +46,7 @@ spec:
     jsonPointers:      
       - /spec/running
     jqPathExpressions:    
-      - .spec.template.spec.domain.devices.interfaces[].macAddress       
+      - .spec.template.spec.domain.devices.interfaces[].macAddress
+      - .spec.template.spec.domain.devices.disks
+      - .spec.template.spec.volumes       
 {{- end }}
