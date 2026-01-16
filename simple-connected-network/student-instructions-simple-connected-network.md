@@ -18,6 +18,8 @@ for node in master1 master2 master3 worker1 worker2 worker3; do
 done
 envsubst < ./charts/install-manifests/values.yaml > ./install-files/values.yaml
 helm template bm-lab ./charts/install-manifests -f ./install-files/values.yaml --output-dir ./install-files
+## or for proxiedEnvironment:
+helm template bm-lab ./charts/install-manifests -f ./install-files/values.yaml --output-dir ./install-files --set proxiedEnvironment=true
 echo $pull_secret > ./install-files/install-manifests/templates/pullsecret.json
 ```    
 

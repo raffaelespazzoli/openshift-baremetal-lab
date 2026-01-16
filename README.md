@@ -32,20 +32,35 @@ helm install kubevirt-redfish v1k0d3n/kubevirt-redfish -n kubevirt-redfish --cre
 
 ### deploy lab helm chart
 
-create a secret with your public key to be able to access the VMs
+create a secret with your public key to be able to access the VMs:
 
 ```sh
 oc new-project bm-lab
 oc create secret generic mykey --from-file=key1=${HOME}/.ssh/id_rsa.pub -n bm-lab
 ```
 
+install this chart for use with an Internet-connected cluster:
+
 ```sh
-helm upgrade -i bm-lab ./charts/bmh-vm -n bm-lab --create-namespace --set sshPublicKeySecretName=mykey --set password=mypwd --set hostingClusterBaseDomain=$(oc get dns.config/cluster -o jsonpath='{.spec.baseDomain}')
+helm upgrade --install bm-lab ./charts/bmh-vm -n bm-lab --create-namespace \
+  --set sshPublicKeySecretName=mykey \
+  --set password=mypwd \
+  --set hostingClusterBaseDomain=$(oc get dns.config/cluster -o jsonpath='{.spec.baseDomain}')
+```
+
+or install this way for a disconnected cluster with a proxy:
+
+```sh
+helm upgrade --install bm-lab ./charts/bmh-vm -n bm-lab --create-namespace \
+  --set sshPublicKeySecretName=mykey \
+  --set password=mypwd \
+  --set hostingClusterBaseDomain=$(oc get dns.config/cluster -o jsonpath='{.spec.baseDomain}') \
+  --set proxiedEnvironment=true
 ```
 
 connect via ssh to bastion, storage, switch
 
-add this to you `.ssh.config`
+add this to your `.ssh/config` after a newline:
 
 ```sh
 Host *.cnv

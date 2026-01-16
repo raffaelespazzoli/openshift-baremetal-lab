@@ -6,6 +6,8 @@ clusterName: cluster-${student_numeral}
 pullSecret: '${pull_secret}'
 sshKey: '${ssh_key}'
 
+proxiedEnvironment: false
+
 
 nodes:
   - name: master1
